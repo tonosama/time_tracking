@@ -50,6 +50,7 @@ pub trait TaskRepository: Send + Sync {
 }
 
 #[cfg(test)]
+#[allow(non_snake_case)]
 pub mod tests {
     use super::*;
     use crate::domain::entities::Task;
@@ -234,7 +235,7 @@ pub mod tests {
 
     // テストケース
     #[tokio::test]
-    async fn test_save_and_find_task() {
+    async fn タスクの保存と取得ができること() {
         let repo = InMemoryTaskRepository::new();
         let task_id = TaskId::new(1).unwrap();
         let project_id = ProjectId::new(1).unwrap();
@@ -248,7 +249,7 @@ pub mod tests {
     }
 
     #[tokio::test]
-    async fn test_find_by_project_id() {
+    async fn プロジェクトIDでタスクが取得できること() {
         let repo = InMemoryTaskRepository::new();
         let project_id1 = ProjectId::new(1).unwrap();
         let project_id2 = ProjectId::new(2).unwrap();
@@ -269,7 +270,7 @@ pub mod tests {
     }
 
     #[tokio::test]
-    async fn test_find_active_by_project_id() {
+    async fn プロジェクトIDでアクティブタスクが取得できること() {
         let repo = InMemoryTaskRepository::new();
         let project_id = ProjectId::new(1).unwrap();
         
@@ -286,7 +287,7 @@ pub mod tests {
     }
 
     #[tokio::test]
-    async fn test_task_history() {
+    async fn タスク履歴が取得できること() {
         let repo = InMemoryTaskRepository::new();
         let task_id = TaskId::new(1).unwrap();
         let project_id = ProjectId::new(1).unwrap();
@@ -308,7 +309,7 @@ pub mod tests {
     }
 
     #[tokio::test]
-    async fn test_count_by_project_id() {
+    async fn プロジェクト内アクティブタスク数が取得できること() {
         let repo = InMemoryTaskRepository::new();
         let project_id = ProjectId::new(1).unwrap();
         
@@ -323,7 +324,7 @@ pub mod tests {
     }
 
     #[tokio::test]
-    async fn test_next_id_generation() {
+    async fn 次のタスクIDが正しく生成されること() {
         let repo = InMemoryTaskRepository::new();
         
         let id1 = repo.next_id().await.unwrap();

@@ -118,12 +118,13 @@ impl Project {
 }
 
 #[cfg(test)]
+#[allow(non_snake_case)]
 mod tests {
     use super::*;
     use chrono::TimeZone;
 
     #[test]
-    fn test_project_creation() {
+    fn プロジェクト作成ができること() {
         let id = ProjectId::new(1).unwrap();
         let project = Project::new(id, "Test Project".to_string()).unwrap();
 
@@ -135,7 +136,7 @@ mod tests {
     }
 
     #[test]
-    fn test_project_creation_with_time() {
+    fn 指定時刻でプロジェクト作成ができること() {
         let id = ProjectId::new(1).unwrap();
         let time = Utc.with_ymd_and_hms(2024, 1, 1, 0, 0, 0).unwrap();
         let project = Project::new_with_time(id, "Test Project".to_string(), time).unwrap();
@@ -144,7 +145,7 @@ mod tests {
     }
 
     #[test]
-    fn test_project_name_validation() {
+    fn プロジェクト名のバリデーションが機能すること() {
         let id = ProjectId::new(1).unwrap();
 
         // 空文字列
@@ -160,7 +161,7 @@ mod tests {
     }
 
     #[test]
-    fn test_project_name_trimming() {
+    fn プロジェクト名の前後空白が除去されること() {
         let id = ProjectId::new(1).unwrap();
         let project = Project::new(id, "  Test Project  ".to_string()).unwrap();
 
@@ -168,7 +169,7 @@ mod tests {
     }
 
     #[test]
-    fn test_project_change_name() {
+    fn プロジェクト名変更ができること() {
         let id = ProjectId::new(1).unwrap();
         let project = Project::new(id, "Original Name".to_string()).unwrap();
         let updated_project = project.change_name("New Name".to_string()).unwrap();
@@ -179,7 +180,7 @@ mod tests {
     }
 
     #[test]
-    fn test_project_change_name_validation() {
+    fn プロジェクト名変更時のバリデーションが機能すること() {
         let id = ProjectId::new(1).unwrap();
         let project = Project::new(id, "Original Name".to_string()).unwrap();
 
@@ -188,7 +189,7 @@ mod tests {
     }
 
     #[test]
-    fn test_project_archive() {
+    fn プロジェクトアーカイブができること() {
         let id = ProjectId::new(1).unwrap();
         let project = Project::new(id, "Test Project".to_string()).unwrap();
         let archived_project = project.archive();
@@ -200,7 +201,7 @@ mod tests {
     }
 
     #[test]
-    fn test_project_restore() {
+    fn プロジェクト復元ができること() {
         let id = ProjectId::new(1).unwrap();
         let project = Project::new(id, "Test Project".to_string()).unwrap();
         let archived_project = project.archive();
@@ -212,7 +213,7 @@ mod tests {
     }
 
     #[test]
-    fn test_project_restore_validation() {
+    fn アクティブプロジェクトの復元が失敗すること() {
         let id = ProjectId::new(1).unwrap();
         let project = Project::new(id, "Test Project".to_string()).unwrap();
 
@@ -221,7 +222,7 @@ mod tests {
     }
 
     #[test]
-    fn test_project_equality() {
+    fn プロジェクトの等価性判定が正しく動作すること() {
         let id = ProjectId::new(1).unwrap();
         let time = Utc.with_ymd_and_hms(2024, 1, 1, 0, 0, 0).unwrap();
 

@@ -72,11 +72,12 @@ impl TaskDto {
 }
 
 #[cfg(test)]
+#[allow(non_snake_case)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_task_dto_from_domain() {
+    fn ドメインからタスクDTO変換が正しく動作すること() {
         let task_id = TaskId::new(1).unwrap();
         let project_id = ProjectId::new(1).unwrap();
         let task = Task::new(task_id, project_id, "Test Task".to_string()).unwrap();
@@ -89,7 +90,7 @@ mod tests {
     }
 
     #[test]
-    fn test_task_dto_to_domain() {
+    fn タスクDTOからドメイン変換が正しく動作すること() {
         let dto = TaskDto {
             id: 1,
             project_id: 1,
@@ -106,7 +107,7 @@ mod tests {
     }
 
     #[test]
-    fn test_archived_task_dto() {
+    fn アーカイブタスクDTO変換が正しく動作すること() {
         let task_id = TaskId::new(1).unwrap();
         let project_id = ProjectId::new(1).unwrap();
         let task = Task::new(task_id, project_id, "Archived Task".to_string()).unwrap();

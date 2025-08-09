@@ -140,11 +140,12 @@ impl DatabaseConnection {
 }
 
 #[cfg(test)]
+#[allow(non_snake_case)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_database_connection_in_memory() -> Result<()> {
+    fn インメモリデータベース接続が正しく動作すること() -> Result<()> {
         let db = DatabaseConnection::new_in_memory()?;
         db.run_migrations()?;
 
@@ -162,7 +163,7 @@ mod tests {
     }
 
     #[test]
-    fn test_database_views_creation() -> Result<()> {
+    fn データベースビュー作成が正しく動作すること() -> Result<()> {
         let db = DatabaseConnection::new_in_memory()?;
         db.run_migrations()?;
 

@@ -68,12 +68,13 @@ impl ProjectDto {
 }
 
 #[cfg(test)]
+#[allow(non_snake_case)]
 mod tests {
     use super::*;
 
 
     #[test]
-    fn test_project_dto_from_domain() {
+    fn ドメインからプロジェクトDTO変換が正しく動作すること() {
         let project_id = ProjectId::new(1).unwrap();
         let project = Project::new(project_id, "Test Project".to_string()).unwrap();
         let dto = ProjectDto::from(project.clone());
@@ -84,7 +85,7 @@ mod tests {
     }
 
     #[test]
-    fn test_project_dto_to_domain() {
+    fn プロジェクトDTOからドメイン変換が正しく動作すること() {
         let dto = ProjectDto {
             id: 1,
             name: "Test Project".to_string(),
@@ -99,7 +100,7 @@ mod tests {
     }
 
     #[test]
-    fn test_archived_project_dto() {
+    fn アーカイブプロジェクトDTO変換が正しく動作すること() {
         let project_id = ProjectId::new(1).unwrap();
         let project = Project::new(project_id, "Archived Project".to_string()).unwrap();
         let archived_project = project.archive();

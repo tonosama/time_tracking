@@ -33,24 +33,25 @@ impl From<ProjectId> for i64 {
 }
 
 #[cfg(test)]
+#[allow(non_snake_case)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_project_id_creation() {
+    fn プロジェクトID作成ができること() {
         let id = ProjectId::new(1).unwrap();
         assert_eq!(id.value(), 1);
     }
 
     #[test]
-    fn test_project_id_positive_validation() {
+    fn プロジェクトIDの正の値バリデーションが機能すること() {
         assert!(ProjectId::new(1).is_ok());
         assert!(ProjectId::new(0).is_err());
         assert!(ProjectId::new(-1).is_err());
     }
 
     #[test]
-    fn test_project_id_equality() {
+    fn プロジェクトIDの等価性判定が正しく動作すること() {
         let id1 = ProjectId::new(1).unwrap();
         let id2 = ProjectId::new(1).unwrap();
         let id3 = ProjectId::new(2).unwrap();
@@ -60,13 +61,13 @@ mod tests {
     }
 
     #[test]
-    fn test_project_id_display() {
+    fn プロジェクトIDの文字列表示が正しく動作すること() {
         let id = ProjectId::new(123).unwrap();
         assert_eq!(format!("{}", id), "123");
     }
 
     #[test]
-    fn test_project_id_conversion() {
+    fn プロジェクトIDの型変換が正しく動作すること() {
         let id = ProjectId::new(42).unwrap();
         let value: i64 = id.into();
         assert_eq!(value, 42);

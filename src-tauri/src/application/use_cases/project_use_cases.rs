@@ -177,6 +177,7 @@ impl<R: ProjectRepository, S: ProjectManagementService> ProjectUseCases for Proj
 }
 
 #[cfg(test)]
+#[allow(non_snake_case)]
 mod tests {
     use super::*;
     use crate::domain::repositories::tests::InMemoryProjectRepository;
@@ -191,7 +192,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_create_project_success() {
+    async fn プロジェクト作成が成功すること() {
         let use_cases = setup_use_cases().await;
         let command = CreateProjectCommand {
             name: "Test Project".to_string(),
@@ -206,7 +207,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_create_project_duplicate_name() {
+    async fn 重複名プロジェクト作成が失敗すること() {
         let use_cases = setup_use_cases().await;
         let command1 = CreateProjectCommand {
             name: "Test Project".to_string(),
@@ -224,7 +225,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_update_project_success() {
+    async fn プロジェクト更新が成功すること() {
         let use_cases = setup_use_cases().await;
         
         // プロジェクトを作成
@@ -247,7 +248,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_update_project_not_found() {
+    async fn 存在しないプロジェクト更新が失敗すること() {
         let use_cases = setup_use_cases().await;
         let command = UpdateProjectCommand {
             id: ProjectId::new(999).unwrap(),
@@ -259,7 +260,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_update_project_duplicate_name() {
+    async fn 重複名でのプロジェクト更新が失敗すること() {
         let use_cases = setup_use_cases().await;
         
         // 2つのプロジェクトを作成
@@ -281,7 +282,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_archive_project_success() {
+    async fn プロジェクトアーカイブが成功すること() {
         let use_cases = setup_use_cases().await;
         
         // プロジェクトを作成
@@ -303,7 +304,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_restore_project_success() {
+    async fn プロジェクト復元が成功すること() {
         let use_cases = setup_use_cases().await;
         
         // プロジェクトを作成してアーカイブ
@@ -328,7 +329,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_get_all_active_projects() {
+    async fn アクティブプロジェクト一覧取得が成功すること() {
         let use_cases = setup_use_cases().await;
         
         // アクティブなプロジェクトを作成
@@ -353,7 +354,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_get_project_history() {
+    async fn プロジェクト履歴取得が成功すること() {
         let use_cases = setup_use_cases().await;
         
         // プロジェクトを作成

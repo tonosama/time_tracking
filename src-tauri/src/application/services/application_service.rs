@@ -43,11 +43,12 @@ impl ApplicationService {
 }
 
 #[cfg(test)]
+#[allow(non_snake_case)]
 mod tests {
     use super::*;
 
     #[tokio::test]
-    async fn test_application_service_creation() {
+    async fn アプリケーションサービス作成ができること() {
         let db = DatabaseConnection::new_in_memory().unwrap();
         db.run_migrations().unwrap();
         

@@ -38,6 +38,7 @@ pub trait ProjectRepository: Send + Sync {
 }
 
 #[cfg(test)]
+#[allow(non_snake_case)]
 pub mod tests {
     use super::*;
     use crate::domain::entities::Project;
@@ -182,7 +183,7 @@ pub mod tests {
 
     // テストケース
     #[tokio::test]
-    async fn test_save_and_find_project() {
+    async fn プロジェクトの保存と取得ができること() {
         let repo = InMemoryProjectRepository::new();
         let id = ProjectId::new(1).unwrap();
         let project = Project::new(id, "Test Project".to_string()).unwrap();
@@ -195,7 +196,7 @@ pub mod tests {
     }
 
     #[tokio::test]
-    async fn test_find_all_active() {
+    async fn アクティブプロジェクト一覧が取得できること() {
         let repo = InMemoryProjectRepository::new();
         let id1 = ProjectId::new(1).unwrap();
         let id2 = ProjectId::new(2).unwrap();
@@ -213,7 +214,7 @@ pub mod tests {
     }
 
     #[tokio::test]
-    async fn test_next_id_generation() {
+    async fn 次のIDが正しく生成されること() {
         let repo = InMemoryProjectRepository::new();
         
         let id1 = repo.next_id().await.unwrap();
@@ -224,7 +225,7 @@ pub mod tests {
     }
 
     #[tokio::test]
-    async fn test_project_history() {
+    async fn プロジェクト履歴が取得できること() {
         let repo = InMemoryProjectRepository::new();
         let id = ProjectId::new(1).unwrap();
         

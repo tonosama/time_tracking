@@ -145,12 +145,13 @@ impl Task {
 }
 
 #[cfg(test)]
+#[allow(non_snake_case)]
 mod tests {
     use super::*;
     use chrono::TimeZone;
 
     #[test]
-    fn test_task_creation() {
+    fn タスク作成ができること() {
         let task_id = TaskId::new(1).unwrap();
         let project_id = ProjectId::new(1).unwrap();
         let task = Task::new(task_id, project_id, "Test Task".to_string()).unwrap();
@@ -164,7 +165,7 @@ mod tests {
     }
 
     #[test]
-    fn test_task_creation_with_time() {
+    fn 指定時刻でタスク作成ができること() {
         let task_id = TaskId::new(1).unwrap();
         let project_id = ProjectId::new(1).unwrap();
         let time = Utc.with_ymd_and_hms(2024, 1, 1, 0, 0, 0).unwrap();
@@ -174,7 +175,7 @@ mod tests {
     }
 
     #[test]
-    fn test_task_name_validation() {
+    fn タスク名のバリデーションが機能すること() {
         let task_id = TaskId::new(1).unwrap();
         let project_id = ProjectId::new(1).unwrap();
 
@@ -191,7 +192,7 @@ mod tests {
     }
 
     #[test]
-    fn test_task_name_trimming() {
+    fn タスク名の前後空白が除去されること() {
         let task_id = TaskId::new(1).unwrap();
         let project_id = ProjectId::new(1).unwrap();
         let task = Task::new(task_id, project_id, "  Test Task  ".to_string()).unwrap();
@@ -200,7 +201,7 @@ mod tests {
     }
 
     #[test]
-    fn test_task_change_name() {
+    fn タスク名変更ができること() {
         let task_id = TaskId::new(1).unwrap();
         let project_id = ProjectId::new(1).unwrap();
         let task = Task::new(task_id, project_id, "Original Name".to_string()).unwrap();
@@ -213,7 +214,7 @@ mod tests {
     }
 
     #[test]
-    fn test_task_change_name_validation() {
+    fn タスク名変更時のバリデーションが機能すること() {
         let task_id = TaskId::new(1).unwrap();
         let project_id = ProjectId::new(1).unwrap();
         let task = Task::new(task_id, project_id, "Original Name".to_string()).unwrap();
@@ -223,7 +224,7 @@ mod tests {
     }
 
     #[test]
-    fn test_task_move_to_project() {
+    fn タスクのプロジェクト移動ができること() {
         let task_id = TaskId::new(1).unwrap();
         let project_id = ProjectId::new(1).unwrap();
         let new_project_id = ProjectId::new(2).unwrap();
@@ -237,7 +238,7 @@ mod tests {
     }
 
     #[test]
-    fn test_task_archive() {
+    fn タスクアーカイブができること() {
         let task_id = TaskId::new(1).unwrap();
         let project_id = ProjectId::new(1).unwrap();
         let task = Task::new(task_id, project_id, "Test Task".to_string()).unwrap();
@@ -250,7 +251,7 @@ mod tests {
     }
 
     #[test]
-    fn test_task_restore() {
+    fn タスク復元ができること() {
         let task_id = TaskId::new(1).unwrap();
         let project_id = ProjectId::new(1).unwrap();
         let task = Task::new(task_id, project_id, "Test Task".to_string()).unwrap();
@@ -263,7 +264,7 @@ mod tests {
     }
 
     #[test]
-    fn test_task_restore_validation() {
+    fn アクティブタスクの復元が失敗すること() {
         let task_id = TaskId::new(1).unwrap();
         let project_id = ProjectId::new(1).unwrap();
         let task = Task::new(task_id, project_id, "Test Task".to_string()).unwrap();
@@ -273,7 +274,7 @@ mod tests {
     }
 
     #[test]
-    fn test_task_belongs_to_project() {
+    fn タスクがプロジェクトに所属すること() {
         let task_id = TaskId::new(1).unwrap();
         let project_id = ProjectId::new(1).unwrap();
         let other_project_id = ProjectId::new(2).unwrap();
@@ -284,7 +285,7 @@ mod tests {
     }
 
     #[test]
-    fn test_task_equality() {
+    fn タスクの等価性判定が正しく動作すること() {
         let task_id = TaskId::new(1).unwrap();
         let project_id = ProjectId::new(1).unwrap();
         let time = Utc.with_ymd_and_hms(2024, 1, 1, 0, 0, 0).unwrap();

@@ -50,47 +50,48 @@ impl Default for Status {
 }
 
 #[cfg(test)]
+#[allow(non_snake_case)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_status_from_str() {
+    fn 文字列からステータスへの変換が正しく動作すること() {
         assert_eq!(Status::from_str("active").unwrap(), Status::Active);
         assert_eq!(Status::from_str("archived").unwrap(), Status::Archived);
         assert!(Status::from_str("invalid").is_err());
     }
 
     #[test]
-    fn test_status_is_active() {
+    fn アクティブステータスの判定が正しく動作すること() {
         assert!(Status::Active.is_active());
         assert!(!Status::Archived.is_active());
     }
 
     #[test]
-    fn test_status_is_archived() {
+    fn アーカイブステータスの判定が正しく動作すること() {
         assert!(!Status::Active.is_archived());
         assert!(Status::Archived.is_archived());
     }
 
     #[test]
-    fn test_status_as_str() {
+    fn ステータスの文字列変換が正しく動作すること() {
         assert_eq!(Status::Active.as_str(), "active");
         assert_eq!(Status::Archived.as_str(), "archived");
     }
 
     #[test]
-    fn test_status_display() {
+    fn ステータスの表示が正しく動作すること() {
         assert_eq!(format!("{}", Status::Active), "active");
         assert_eq!(format!("{}", Status::Archived), "archived");
     }
 
     #[test]
-    fn test_status_default() {
+    fn ステータスのデフォルト値がアクティブであること() {
         assert_eq!(Status::default(), Status::Active);
     }
 
     #[test]
-    fn test_status_equality() {
+    fn ステータスの等価性判定が正しく動作すること() {
         assert_eq!(Status::Active, Status::Active);
         assert_eq!(Status::Archived, Status::Archived);
         assert_ne!(Status::Active, Status::Archived);

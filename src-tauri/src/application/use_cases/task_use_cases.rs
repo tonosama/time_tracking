@@ -208,6 +208,7 @@ impl<T: TaskRepository, P: ProjectRepository> TaskUseCases for TaskUseCasesImpl<
 }
 
 #[cfg(test)]
+#[allow(non_snake_case)]
 mod tests {
     use super::*;
     use crate::domain::entities::Project;
@@ -228,7 +229,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_create_task_success() {
+    async fn タスク作成が成功すること() {
         let (use_cases, project_id) = setup_use_cases().await;
         let command = CreateTaskCommand {
             project_id,
@@ -245,7 +246,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_create_task_project_not_found() {
+    async fn 存在しないプロジェクトでタスク作成が失敗すること() {
         let (use_cases, _) = setup_use_cases().await;
         let command = CreateTaskCommand {
             project_id: ProjectId::new(999).unwrap(),
@@ -257,7 +258,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_create_task_in_archived_project() {
+    async fn アーカイブプロジェクトでタスク作成が失敗すること() {
         let (use_cases, project_id) = setup_use_cases().await;
         
         // プロジェクトをアーカイブ
@@ -275,7 +276,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_update_task_name() {
+    async fn タスク名更新が成功すること() {
         let (use_cases, project_id) = setup_use_cases().await;
         
         // タスクを作成
@@ -299,7 +300,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_move_task_to_project() {
+    async fn タスクのプロジェクト移動が成功すること() {
         let (use_cases, project_id) = setup_use_cases().await;
         
         // 新しいプロジェクトを作成
@@ -327,7 +328,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_archive_task_success() {
+    async fn タスクアーカイブが成功すること() {
         let (use_cases, project_id) = setup_use_cases().await;
         
         // タスクを作成
@@ -349,7 +350,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_restore_task_success() {
+    async fn タスク復元が成功すること() {
         let (use_cases, project_id) = setup_use_cases().await;
         
         // タスクを作成してアーカイブ
@@ -374,7 +375,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_restore_task_in_archived_project() {
+    async fn アーカイブプロジェクトでタスク復元が失敗すること() {
         let (use_cases, project_id) = setup_use_cases().await;
         
         // タスクを作成してアーカイブ
@@ -401,7 +402,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_get_active_tasks_by_project() {
+    async fn プロジェクトのアクティブタスク一覧取得が成功すること() {
         let (use_cases, project_id) = setup_use_cases().await;
         
         // アクティブなタスクを作成
@@ -427,7 +428,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_get_task_history() {
+    async fn タスク履歴取得が成功すること() {
         let (use_cases, project_id) = setup_use_cases().await;
         
         // タスクを作成

@@ -33,24 +33,25 @@ impl From<TaskId> for i64 {
 }
 
 #[cfg(test)]
+#[allow(non_snake_case)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_task_id_creation() {
+    fn タスクID作成ができること() {
         let id = TaskId::new(1).unwrap();
         assert_eq!(id.value(), 1);
     }
 
     #[test]
-    fn test_task_id_positive_validation() {
+    fn タスクIDの正の値バリデーションが機能すること() {
         assert!(TaskId::new(1).is_ok());
         assert!(TaskId::new(0).is_err());
         assert!(TaskId::new(-1).is_err());
     }
 
     #[test]
-    fn test_task_id_equality() {
+    fn タスクIDの等価性判定が正しく動作すること() {
         let id1 = TaskId::new(1).unwrap();
         let id2 = TaskId::new(1).unwrap();
         let id3 = TaskId::new(2).unwrap();
@@ -60,13 +61,13 @@ mod tests {
     }
 
     #[test]
-    fn test_task_id_display() {
+    fn タスクIDの文字列表示が正しく動作すること() {
         let id = TaskId::new(456).unwrap();
         assert_eq!(format!("{}", id), "456");
     }
 
     #[test]
-    fn test_task_id_conversion() {
+    fn タスクIDの型変換が正しく動作すること() {
         let id = TaskId::new(99).unwrap();
         let value: i64 = id.into();
         assert_eq!(value, 99);

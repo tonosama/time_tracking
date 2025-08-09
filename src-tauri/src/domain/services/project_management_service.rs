@@ -106,6 +106,7 @@ impl<P: ProjectRepository, T: TaskRepository> ProjectManagementService for Proje
 }
 
 #[cfg(test)]
+#[allow(non_snake_case)]
 mod tests {
     use super::*;
     use crate::domain::entities::{Project, Task};
@@ -120,7 +121,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_can_archive_project_with_no_active_tasks() {
+    async fn アクティブタスクがないプロジェクトはアーカイブできること() {
         let service = setup_service().await;
         let project_id = ProjectId::new(1).unwrap();
         let project = Project::new(project_id, "Test Project".to_string()).unwrap();
@@ -132,7 +133,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_cannot_archive_project_with_active_tasks() {
+    async fn アクティブタスクがあるプロジェクトはアーカイブできないこと() {
         let service = setup_service().await;
         let project_id = ProjectId::new(1).unwrap();
         let task_id = TaskId::new(1).unwrap();
@@ -148,7 +149,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_can_archive_project_with_only_archived_tasks() {
+    async fn アーカイブタスクのみのプロジェクトはアーカイブできること() {
         let service = setup_service().await;
         let project_id = ProjectId::new(1).unwrap();
         let task_id = TaskId::new(1).unwrap();
@@ -165,7 +166,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_validate_project_hierarchy_success() {
+    async fn プロジェクト階層バリデーションが成功すること() {
         let service = setup_service().await;
         let project_id = ProjectId::new(1).unwrap();
         let project = Project::new(project_id, "Test Project".to_string()).unwrap();
@@ -177,7 +178,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_validate_project_hierarchy_archived_with_active_tasks() {
+    async fn アーカイブプロジェクトにアクティブタスクがあるとバリデーションエラーとなること() {
         let service = setup_service().await;
         let project_id = ProjectId::new(1).unwrap();
         let task_id = TaskId::new(1).unwrap();
@@ -194,7 +195,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_is_project_name_unique() {
+    async fn プロジェクト名の一意性チェックが機能すること() {
         let service = setup_service().await;
         let project_id = ProjectId::new(1).unwrap();
         let project = Project::new(project_id, "Existing Project".to_string()).unwrap();
@@ -215,7 +216,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_archive_project_with_tasks() {
+    async fn タスクありプロジェクトの強制アーカイブができること() {
         let service = setup_service().await;
         let project_id = ProjectId::new(1).unwrap();
         let task_id = TaskId::new(1).unwrap();
@@ -238,7 +239,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_archive_already_archived_project() {
+    async fn 既にアーカイブ済みプロジェクトはアーカイブできないこと() {
         let service = setup_service().await;
         let project_id = ProjectId::new(1).unwrap();
         let project = Project::new(project_id, "Test Project".to_string()).unwrap();
