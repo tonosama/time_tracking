@@ -1,0 +1,213 @@
+project:
+  id: "TTG"
+  name: "Time Tracker Go"
+  start_date: "2025-08-04"
+  end_date: "2025-12-31"
+  product_owner: "tonosama"
+  scrum_master: "tonosama"
+  last_updated: "2025-08-04"
+  description: |
+    ローカル環境（macOS）で動作するタイムトラッキングツール。アプリのインストールや外部通信に制約がある環境でも
+    タスクの時間計測・記録・分析を容易にし、生産性向上を支援する。データはSQLiteに暗号化保存し、
+    更新・削除を伴わない追記専用（イミュータブル）モデルを採用する。
+
+# スプリント定義
+sprints:
+  - sprint_id: "S1"
+    name: "スプリント1"
+    start_date: "2025-08-05"
+    end_date: "2025-08-18"
+    goal: "基盤とコア（タスク/タイムトラッキング）実装"
+    status: "planned"
+  - sprint_id: "S2"
+    name: "スプリント2"
+    start_date: "2025-08-19"
+    end_date: "2025-09-01"
+    goal: "レポート（集計）とタグ機能実装"
+    status: "planned"
+  - sprint_id: "S3"
+    name: "スプリント3"
+    start_date: "2025-09-02"
+    end_date: "2025-09-15"
+    goal: "可視化の強化と安定化"
+    status: "planned"
+
+# エピック定義
+epics:
+  - epic_id: "EP-001"
+    title: "タスク管理"
+    description: "プロジェクト/タスクの作成・編集・削除、階層構造と状態管理（active/archived）を提供する"
+    priority: "high"
+    status: "new"
+    stories:
+      - story_id: "US-001"
+        title: "タスクを作成・編集・削除し、階層で管理できる"
+        description: |
+          ユーザーとして、プロジェクト配下にタスクを作成/編集/削除し、階層で整理したい。
+          なぜなら、複数の作業をわかりやすく管理したいから。
+        priority: "high"
+        story_points: 5
+        assignee: "tonosama"
+        status: "planned"
+        sprint: "S1"
+        memo: "タスクの現在値はtask_current_view経由で取得"
+        acceptance_criteria:
+          - "プロジェクト配下にタスクを作成できる（名前・状態）"
+          - "タスクの状態をactive/archivedで切替できる"
+          - "階層（プロジェクト→タスク）がUIとデータで一貫している"
+
+  - epic_id: "EP-002"
+    title: "時間計測（タイムトラッキング）"
+    description: "タスクごとにタイマーの開始/停止、手動記録、注釈付与をイベントとして記録する"
+    priority: "high"
+    status: "new"
+    stories:
+      - story_id: "US-002"
+        title: "タスクごとにタイマーを開始/停止できる"
+        description: |
+          ユーザーとして、選択したタスクでワンクリックでタイマーを開始/停止したい。
+          なぜなら、手間なく実作業時間を計測したいから。
+        priority: "high"
+        story_points: 8
+        assignee: "tonosama"
+        status: "planned"
+        sprint: "S1"
+        memo: "time_entry_eventsにstart/stopをINSERT-onlyで記録"
+        acceptance_criteria:
+          - "start/stop操作がイベントとして保存される（at, task_id, event_type）"
+          - "同一タスクの連続start時は暗黙stopで直前区間が閉じる"
+          - "実行中のタスクがUIで視覚的に分かる"
+      - story_id: "US-003"
+        title: "手動で時間区間を追加・修正できる"
+        description: |
+          ユーザーとして、過去の作業時間を手動で追加/修正したい。
+          なぜなら、取りこぼしや誤操作を補正したいから。
+        priority: "medium"
+        story_points: 5
+        assignee: "tonosama"
+        status: "planned"
+        sprint: "S2"
+        memo: "annotateイベント/補正イベントで整合性維持"
+        acceptance_criteria:
+          - "開始時刻・終了時刻・メモを指定して区間を登録できる"
+          - "区間の重複/逆行は検出し、補正方針に従い除外または注記される"
+
+  - epic_id: "EP-003"
+    title: "基本レポート/集計"
+    description: "日/週/月単位の作業時間集計（タスク/プロジェクト/タグ軸）を表示する"
+    priority: "high"
+    status: "new"
+    stories:
+      - story_id: "US-004"
+        title: "日/週/月の集計レポートを表示できる"
+        description: |
+          ユーザーとして、期間別の作業時間をタスク/プロジェクト/タグ別に集計して見たい。
+          なぜなら、時間の使い方を把握し改善したいから。
+        priority: "high"
+        story_points: 5
+        assignee: "tonosama"
+        status: "planned"
+        sprint: "S2"
+        memo: "time_entries_viewで区間を導出しフロントで集計"
+        acceptance_criteria:
+          - "日/週/月を切替できる"
+          - "タスク/プロジェクト/タグでのグルーピングができる"
+          - "期間・タグ・プロジェクトでフィルタできる"
+
+  - epic_id: "EP-004"
+    title: "タグ管理"
+    description: "タスクにタグを付与/剥奪し、現在付与中のタグ集合を導出する"
+    priority: "high"
+    status: "new"
+    stories:
+      - story_id: "US-005"
+        title: "タスクにタグを追加/削除できる"
+        description: |
+          ユーザーとして、タスクに複数タグを付け外ししたい。
+          なぜなら、後で集計・検索をしやすくしたいから。
+        priority: "medium"
+        story_points: 3
+        assignee: "tonosama"
+        status: "planned"
+        sprint: "S2"
+        memo: "task_tag_eventsとtask_tags_currentビューを実装"
+        acceptance_criteria:
+          - "タグの追加/削除がイベントとして保持される"
+          - "現在付与中のタグ一覧が正しく表示される"
+
+  - epic_id: "EP-005"
+    title: "基盤設計/インフラ"
+    description: "Tauri+React+Rust構成、SQLiteイミュータブルスキーマ、暗号化、マイグレーションを整備する"
+    priority: "high"
+    status: "new"
+    stories:
+      - story_id: "US-006"
+        title: "SQLiteスキーマ（追記専用）とビューを用意する"
+        description: |
+          開発者として、イミュータブルなスキーマと現在値/区間/タグの各ビューを提供したい。
+          なぜなら、整合性と監査可能性を確保するため。
+        priority: "high"
+        story_points: 8
+        assignee: "tonosama"
+        status: "planned"
+        sprint: "S1"
+        memo: "projects/tasksとversions/events、各ビュー定義を含む"
+        acceptance_criteria:
+          - "必須テーブルとインデックスが作成される"
+          - "task_current_view/time_entries_view/task_tags_currentが利用可能"
+      - story_id: "US-007"
+        title: "データ暗号化とキー管理を実装する"
+        description: |
+          開発者として、ローカルDBを暗号化し、キーをOS Keychainで安全に管理したい。
+          なぜなら、ユーザーデータの漏えいを防ぐため。
+        priority: "high"
+        story_points: 5
+        assignee: "tonosama"
+        status: "planned"
+        sprint: "S1"
+        memo: "SQLCipher, PRAGMA rekey, Keychain連携"
+        acceptance_criteria:
+          - "DBファイルが暗号化されている"
+          - "rekeyで鍵更新が可能である"
+
+  - epic_id: "EP-006"
+    title: "高度な可視化（将来）"
+    description: "グラフ化やインサイト表示などの高度な可視化"
+    priority: "medium"
+    status: "new"
+    stories:
+      - story_id: "US-008"
+        title: "作業時間のグラフ化を行う"
+        description: |
+          ユーザーとして、期間別・タグ別の作業時間をチャートで見たい。
+          なぜなら、傾向を直感的に把握したいから。
+        priority: "medium"
+        story_points: 5
+        assignee: "tonosama"
+        status: "planned"
+        sprint: "S3"
+        memo: "前提: 集計API/ビューが安定していること"
+        acceptance_criteria:
+          - "日/週/月でのチャート表示が可能"
+          - "凡例・フィルタで系列切替ができる"
+
+  - epic_id: "EP-007"
+    title: "ポモドーロ（Could）"
+    description: "ポモドーロタイマー機能"
+    priority: "low"
+    status: "new"
+    stories:
+      - story_id: "US-009"
+        title: "ポモドーロタイマーを使える"
+        description: |
+          ユーザーとして、ポモドーロ法で25分作業+5分休憩のサイクルで集中したい。
+          なぜなら、集中力を維持したいから。
+        priority: "low"
+        story_points: 3
+        assignee: "tonosama"
+        status: "planned"
+        sprint: "S3"
+        memo: "通知/サウンド、一時停止、スキップ"
+        acceptance_criteria:
+          - "作業/休憩の自動切替と通知が機能する"
+          - "残り時間の表示と開始/停止が行える"

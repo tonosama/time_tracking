@@ -1,0 +1,54 @@
+[package]
+name = "time-tracker-go"
+version = "0.1.0"
+description = "A lightweight time tracking application for macOS"
+authors = ["tonosama"]
+license = "MIT"
+repository = "https://github.com/tonosama/time-tracker-go"
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "1.0", features = [] }
+
+[dependencies]
+# Tauri
+tauri = { version = "1.0", features = ["api-all", "system-tray"] }
+
+# Async runtime
+tokio = { version = "1.0", features = ["full"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Error handling
+anyhow = "1.0"
+thiserror = "1.0"
+
+# Database
+rusqlite = { version = "0.29", features = ["bundled", "chrono"] }
+
+# Time handling
+chrono = { version = "0.4", features = ["serde"] }
+
+# Async traits
+async-trait = "0.1"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[dev-dependencies]
+tempfile = "3.0"
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
+
+[[bin]]
+name = "time-tracker-go"
+path = "src/main.rs"
+
+[lib]
+name = "time_tracker_go"
+path = "src/lib.rs"
