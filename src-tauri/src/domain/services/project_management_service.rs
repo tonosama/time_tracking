@@ -1,6 +1,6 @@
 use crate::domain::entities::Project;
 use crate::domain::repositories::{ProjectRepository, TaskRepository};
-use crate::domain::value_objects::{ProjectId, Status};
+use crate::domain::value_objects::ProjectId;
 use async_trait::async_trait;
 
 /// プロジェクト管理ドメインサービス
@@ -109,8 +109,9 @@ impl<P: ProjectRepository, T: TaskRepository> ProjectManagementService for Proje
 mod tests {
     use super::*;
     use crate::domain::entities::{Project, Task};
-    use crate::domain::repositories::project_repository::tests::InMemoryProjectRepository;
-    use crate::domain::repositories::task_repository::tests::InMemoryTaskRepository;
+    use crate::domain::value_objects::TaskId;
+    use crate::domain::repositories::tests::InMemoryProjectRepository;
+    use crate::domain::repositories::task_tests::InMemoryTaskRepository;
 
     async fn setup_service() -> ProjectManagementServiceImpl<InMemoryProjectRepository, InMemoryTaskRepository> {
         let project_repo = InMemoryProjectRepository::new();

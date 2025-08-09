@@ -1,6 +1,6 @@
 use crate::domain::entities::Task;
 use crate::domain::repositories::{TaskRepository, ProjectRepository};
-use crate::domain::value_objects::{ProjectId, TaskId, Status};
+use crate::domain::value_objects::{ProjectId, TaskId};
 use async_trait::async_trait;
 
 /// タスク作成コマンド
@@ -211,8 +211,8 @@ impl<T: TaskRepository, P: ProjectRepository> TaskUseCases for TaskUseCasesImpl<
 mod tests {
     use super::*;
     use crate::domain::entities::Project;
-    use crate::domain::repositories::project_repository::tests::InMemoryProjectRepository;
-    use crate::domain::repositories::task_repository::tests::InMemoryTaskRepository;
+    use crate::domain::repositories::tests::InMemoryProjectRepository;
+    use crate::domain::repositories::task_tests::InMemoryTaskRepository;
 
     async fn setup_use_cases() -> (TaskUseCasesImpl<InMemoryTaskRepository, InMemoryProjectRepository>, ProjectId) {
         let task_repo = InMemoryTaskRepository::new();

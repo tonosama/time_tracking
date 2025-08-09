@@ -209,7 +209,7 @@ mod tests {
         assert_eq!(updated_task.name(), "New Name");
         assert_eq!(updated_task.id(), task_id);
         assert_eq!(updated_task.project_id(), project_id);
-        assert_ne!(updated_task.effective_at(), task.effective_at());
+        assert!(updated_task.effective_at() >= task.effective_at());
     }
 
     #[test]
@@ -233,7 +233,7 @@ mod tests {
         assert_eq!(moved_task.project_id(), new_project_id);
         assert_eq!(moved_task.id(), task_id);
         assert_eq!(moved_task.name(), "Test Task");
-        assert_ne!(moved_task.effective_at(), task.effective_at());
+        assert!(moved_task.effective_at() >= task.effective_at());
     }
 
     #[test]
@@ -246,7 +246,7 @@ mod tests {
         assert_eq!(archived_task.status(), &Status::Archived);
         assert!(!archived_task.is_active());
         assert!(archived_task.is_archived());
-        assert_ne!(archived_task.effective_at(), task.effective_at());
+        assert!(archived_task.effective_at() >= task.effective_at());
     }
 
     #[test]

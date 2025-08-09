@@ -50,7 +50,7 @@ pub trait TaskRepository: Send + Sync {
 }
 
 #[cfg(test)]
-mod tests {
+pub mod tests {
     use super::*;
     use crate::domain::entities::Task;
     use std::collections::HashMap;
@@ -58,7 +58,7 @@ mod tests {
     use tokio::sync::Mutex;
 
     // テスト用のインメモリリポジトリ実装
-    #[derive(Debug, Default)]
+    #[derive(Debug, Default, Clone)]
     pub struct InMemoryTaskRepository {
         tasks: Arc<Mutex<HashMap<TaskId, Vec<Task>>>>,
         next_id: Arc<Mutex<i64>>,

@@ -1,9 +1,8 @@
 use crate::domain::entities::Project;
 use crate::domain::repositories::ProjectRepository;
 use crate::domain::services::ProjectManagementService;
-use crate::domain::value_objects::{ProjectId, Status};
+use crate::domain::value_objects::ProjectId;
 use async_trait::async_trait;
-use chrono::{DateTime, Utc};
 
 /// プロジェクト作成コマンド
 #[derive(Debug, Clone)]
@@ -180,9 +179,9 @@ impl<R: ProjectRepository, S: ProjectManagementService> ProjectUseCases for Proj
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::domain::repositories::project_repository::tests::InMemoryProjectRepository;
-    use crate::domain::repositories::task_repository::tests::InMemoryTaskRepository;
-    use crate::domain::services::project_management_service::ProjectManagementServiceImpl;
+    use crate::domain::repositories::tests::InMemoryProjectRepository;
+    use crate::domain::repositories::task_tests::InMemoryTaskRepository;
+    use crate::domain::services::ProjectManagementServiceImpl;
 
     async fn setup_use_cases() -> ProjectUseCasesImpl<InMemoryProjectRepository, ProjectManagementServiceImpl<InMemoryProjectRepository, InMemoryTaskRepository>> {
         let project_repo = InMemoryProjectRepository::new();

@@ -9,6 +9,7 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 
 /// SQLiteタスクリポジトリ実装
+#[derive(Clone)]
 pub struct SqliteTaskRepository {
     db: Arc<Mutex<DatabaseConnection>>,
 }

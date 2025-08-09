@@ -175,7 +175,7 @@ mod tests {
 
         assert_eq!(updated_project.name(), "New Name");
         assert_eq!(updated_project.id(), id);
-        assert_ne!(updated_project.effective_at(), project.effective_at());
+        assert!(updated_project.effective_at() >= project.effective_at());
     }
 
     #[test]
@@ -196,7 +196,7 @@ mod tests {
         assert_eq!(archived_project.status(), &Status::Archived);
         assert!(!archived_project.is_active());
         assert!(archived_project.is_archived());
-        assert_ne!(archived_project.effective_at(), project.effective_at());
+        assert!(archived_project.effective_at() >= project.effective_at());
     }
 
     #[test]

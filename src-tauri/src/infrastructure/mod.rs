@@ -6,5 +6,5 @@ pub mod config;
 
 pub use database::*;
 pub use repositories::*;
-pub use config::*;
+// pub use config::*;
 

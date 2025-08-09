@@ -1,6 +1,4 @@
 use crate::application::use_cases::{ProjectUseCases, TaskUseCases};
-use crate::domain::repositories::{ProjectRepository, TaskRepository};
-use crate::domain::services::ProjectManagementService;
 use crate::infrastructure::database::DatabaseConnection;
 use crate::infrastructure::repositories::{SqliteProjectRepository, SqliteTaskRepository};
 use std::sync::Arc;

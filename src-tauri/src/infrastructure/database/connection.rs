@@ -144,36 +144,36 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_database_connection_in_memory() {
-        let db = DatabaseConnection::new_in_memory().unwrap();
-        db.run_migrations().unwrap();
+    fn test_database_connection_in_memory() -> Result<()> {
+        let db = DatabaseConnection::new_in_memory()?;
+        db.run_migrations()?;
 
         // テーブルが作成されていることを確認
-        let tables: Vec<String> = db.connection()
-            .prepare("SELECT name FROM sqlite_master WHERE type='table'")?
-            .query_map([], |row| row.get(0))?
-            .collect::<Result<Vec<_>, _>>()
-            .unwrap();
+        let mut stmt = db.connection()
+            .prepare("SELECT name FROM sqlite_master WHERE type='table'")?;
+        let table_iter = stmt.query_map([], |row| row.get(0))?;
+        let tables: Vec<String> = table_iter.collect::<Result<Vec<_>, _>>()?;
 
         assert!(tables.contains(&"projects".to_string()));
         assert!(tables.contains(&"project_versions".to_string()));
         assert!(tables.contains(&"tasks".to_string()));
         assert!(tables.contains(&"task_versions".to_string()));
+        Ok(())
     }
 
     #[test]
-    fn test_database_views_creation() {
-        let db = DatabaseConnection::new_in_memory().unwrap();
-        db.run_migrations().unwrap();
+    fn test_database_views_creation() -> Result<()> {
+        let db = DatabaseConnection::new_in_memory()?;
+        db.run_migrations()?;
 
         // ビューが作成されていることを確認
-        let views: Vec<String> = db.connection()
-            .prepare("SELECT name FROM sqlite_master WHERE type='view'")?
-            .query_map([], |row| row.get(0))?
-            .collect::<Result<Vec<_>, _>>()
-            .unwrap();
+        let mut stmt = db.connection()
+            .prepare("SELECT name FROM sqlite_master WHERE type='view'")?;
+        let view_iter = stmt.query_map([], |row| row.get(0))?;
+        let views: Vec<String> = view_iter.collect::<Result<Vec<_>, _>>()?;
 
         assert!(views.contains(&"project_current_view".to_string()));
         assert!(views.contains(&"task_current_view".to_string()));
+        Ok(())
     }
 }

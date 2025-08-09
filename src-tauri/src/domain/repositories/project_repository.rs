@@ -38,7 +38,7 @@ pub trait ProjectRepository: Send + Sync {
 }
 
 #[cfg(test)]
-mod tests {
+pub mod tests {
     use super::*;
     use crate::domain::entities::Project;
     use std::collections::HashMap;
@@ -46,7 +46,7 @@ mod tests {
     use tokio::sync::Mutex;
 
     // テスト用のインメモリリポジトリ実装
-    #[derive(Debug, Default)]
+    #[derive(Debug, Default, Clone)]
     pub struct InMemoryProjectRepository {
         projects: Arc<Mutex<HashMap<ProjectId, Vec<Project>>>>,
         next_id: Arc<Mutex<i64>>,
