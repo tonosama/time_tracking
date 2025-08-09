@@ -50,10 +50,13 @@ src-tauri/Cargo.lock
 .DS_Store
 
 # Rust
+debug/
 target/
 Cargo.lock
+**/*.rs.bk
+*.pdb
+**/mutants.out*/
 
 # Backup files
 *.bak
 *.backup
-
