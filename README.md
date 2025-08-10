@@ -1,105 +1,248 @@
 # Time Tracker Go
 
-軽量で高速なmacOS向けタイムトラッキングアプリケーション
+軽量で高速なmacOS向けタイムトラッキングデスクトップアプリケーション
 
-## プロジェクト概要
+## 概要
 
-このアプリケーションは、ドメイン駆動設計（DDD）とテスト駆動開発（TDD）に基づいて構築された、ローカル完結型のタイムトラッキングツールです。
+Time Tracker Goは、Tauri 2.xフレームワークを使用したローカル完結型のタイムトラッキングアプリケーションです。データはすべてローカルのSQLiteデータベースに保存され、外部との通信は行いません。
 
 ### 技術スタック
 
-- **フレームワーク**: Tauri
+- **フレームワーク**: Tauri 2.x（2024年10月安定版）
 - **バックエンド**: Rust
 - **フロントエンド**: React + TypeScript
-- **データベース**: SQLite（暗号化対応）
-- **テスト**: Rust（cargo test）、Vitest、Playwright
+- **データベース**: SQLite（イミュータブルデータモデル）
+- **開発手法**: DDD（ドメイン駆動設計）+ TDD（テスト駆動開発）
+- **テスト**: Vitest + React Testing Library + Playwright
 
-## アーキテクチャ
+### 主要機能
 
-### DDDの4層アーキテクチャ
+- ✅ プロジェクト/タスクの作成・編集・削除
+- ✅ 階層構造とステータス管理（active/archived）
+- 🚧 タイムトラッキング（開始/停止/計測）
+- 🚧 レポート生成機能
+- 🚧 タグ機能
 
-```
-src-tauri/src/
-├── domain/              # ドメイン層
-│   ├── entities/        # エンティティ
-│   ├── value_objects/   # 値オブジェクト
-│   ├── repositories/    # リポジトリトレイト
-│   └── services/        # ドメインサービス
-├── application/         # アプリケーション層
-│   ├── use_cases/       # ユースケース
-│   ├── dto/             # データ転送オブジェクト
-│   └── services/        # アプリケーションサービス
-├── infrastructure/     # インフラ層
-│   ├── database/        # データベース接続・マイグレーション
-│   ├── repositories/   # リポジトリ実装
-│   └── config/          # 設定管理
-└── presentation/       # プレゼンテーション層
-    └── commands/        # Tauriコマンド
-```
+## 環境構築
 
-### フロントエンド構造
+### 必要な依存関係
 
-```
-src/
-├── components/         # UIコンポーネント
-│   ├── common/         # 共通コンポーネント
-│   ├── projects/       # プロジェクト関連
-│   ├── tasks/          # タスク関連
-│   ├── time_tracking/  # 時間計測関連
-│   └── reports/        # レポート関連
-├── hooks/              # カスタムフック
-├── services/           # API通信
-├── types/              # 型定義
-└── utils/              # ユーティリティ
-```
-
-## データモデル
-
-イミュータブル（追記専用）データモデルを採用：
-
-- **バージョン管理**: プロジェクト・タスクの変更履歴を管理
-- **イベント管理**: 時間計測とタグ操作をイベントとして記録
-- **ビュー**: 現在値は専用ビューで導出
-
-## 開発環境セットアップ
-
-### 前提条件
-
-- Node.js 18+
-- Rust 1.70+
-- Tauri CLI
-
-### インストール
-
+1. **Rust**（最新安定版）
 ```bash
-# 依存関係のインストール
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+source ~/.cargo/env
+```
+
+2. **Node.js**（v18以上）
+```bash
+brew install node
+```
+
+3. **ImageMagick**（アイコン生成用）
+```bash
+brew install imagemagick
+```
+
+### セットアップ手順
+
+1. **リポジトリクローン**
+```bash
+git clone https://github.com/tonosama/time_tracking.git
+cd time_tracking
+```
+
+2. **依存関係インストール**
+```bash
+# フロントエンド依存関係
 npm install
 
-# Tauri CLIのインストール
-npm install -g @tauri-apps/cli
-
-# 開発サーバーの起動
-npm run tauri dev
+# Rust依存関係（初回ビルド時に自動実行）
 ```
 
-### テスト実行
+3. **アイコン作成**（必要に応じて）
+```bash
+cd src-tauri/icons
+magick -size 32x32 xc:"rgba(70,130,180,1)" \
+  -fill "rgba(255,255,255,1)" \
+  -stroke "rgba(255,255,255,1)" \
+  -strokewidth 2 \
+  -draw "circle 16,16 16,6" \
+  -strokewidth 1 \
+  -draw "line 16,16 16,8" \
+  -draw "line 16,16 22,16" \
+  -fill "rgba(255,255,255,1)" \
+  -draw "circle 16,16 16,14" \
+  PNG32:icon.png
+cd ../..
+```
+
+## 開発
+
+### 開発サーバー起動
 
 ```bash
-# Rustユニットテスト
-cd src-tauri && cargo test
+# Tauriアプリケーション（推奨）
+npm run tauri:dev
 
-# フロントエンドテスト
-npm test
-
-# E2Eテスト
-npm run test:e2e
+# または、フロントエンドのみ
+npm run dev
 ```
 
-## プロジェクト設計文書
+- **Tauriアプリ**: デスクトップアプリウィンドウが自動で開きます
+- **フロントエンドのみ**: http://localhost:1420 でアクセス
 
-詳細な設計については以下の文書を参照してください：
+### ビルド
 
-- [プロダクト要求仕様書（PRD）](doc/prd_time_tracker_go.md)
-- [設計文書](doc/design_doc_time_tracker_go.md)
-- [バックログ](doc/backlog/backlog.yaml)
+```bash
+# 開発ビルド
+npm run build
 
+# リリースビルド
+npm run tauri:build
+```
+
+### テスト
+
+```bash
+# Unit/Integrationテスト
+npm test
+
+# Unit/Integrationテスト（UIモード）
+npm run test:ui
+
+# E2Eテスト（Playwrightが必要）
+npm run test:e2e
+
+# E2Eテスト（UIモード）
+npm run test:e2e:ui
+
+# Rustテスト
+cd src-tauri && cargo test
+```
+
+## トラブルシューティング
+
+### よくある問題
+
+#### 1. アイコンエラー: "icon is not RGBA"
+
+**症状**: Tauriコンパイル時にアイコン形式エラー
+
+**解決策**:
+```bash
+cd src-tauri/icons
+rm -f icon.png
+# 上記のImageMagickコマンドでRGBA形式アイコンを再作成
+```
+
+#### 2. プロセス強制終了
+
+**Tauriプロセスが残ってしまった場合**:
+```bash
+pkill -f "tauri|cargo.*tauri|vite|time-tracker-go"
+```
+
+#### 3. "プロジェクトの読み込みに失敗しました"
+
+**症状**: UI上にエラーメッセージ表示
+
+**説明**: 初期状態では正常です（データベースが空のため）
+
+**解決策**: プロジェクト作成機能の実装完了後に解消されます
+
+#### 4. ウィンドウが開かない
+
+**確認方法**:
+1. macOSのDockで青い時計アイコンを確認
+2. `Command + Tab`でアプリケーション切り替え
+3. ブラウザで http://localhost:1420 にアクセス
+
+#### 5. Playwright E2Eテストエラー
+
+**初回セットアップ**:
+```bash
+npx playwright install
+```
+
+## プロジェクト構造
+
+```
+time_tracking/
+├── src/                        # フロントエンド（React/TypeScript）
+│   ├── components/             # UIコンポーネント
+│   │   └── projects/          # プロジェクト関連コンポーネント
+│   ├── types/                 # TypeScript型定義
+│   └── styles/                # CSS
+├── src-tauri/                  # バックエンド（Rust）
+│   ├── src/
+│   │   ├── domain/            # ドメイン層（DDD）
+│   │   │   ├── entities/      # エンティティ
+│   │   │   ├── value_objects/ # 値オブジェクト
+│   │   │   ├── repositories/  # リポジトリトレイト
+│   │   │   └── services/      # ドメインサービス
+│   │   ├── application/       # アプリケーション層
+│   │   │   ├── use_cases/     # ユースケース
+│   │   │   ├── dto/           # データ転送オブジェクト
+│   │   │   └── services/      # アプリケーションサービス
+│   │   ├── infrastructure/    # インフラ層
+│   │   │   ├── database/      # データベース接続
+│   │   │   └── repositories/  # リポジトリ実装
+│   │   └── presentation/      # プレゼンテーション層
+│   │       └── commands/      # Tauriコマンド
+│   ├── icons/                 # アプリケーションアイコン
+│   └── Cargo.toml            # Rust依存関係
+├── tests/                     # テスト
+│   ├── unit/                  # 単体テスト
+│   ├── integration/           # 結合テスト
+│   └── e2e/                   # E2Eテスト（Playwright）
+├── database/                  # データベーススキーマ
+│   └── migrations/           # マイグレーションSQL
+└── doc/                       # ドキュメント
+    ├── design_doc_time_tracker_go.md  # 設計文書
+    └── backlog/              # プロダクトバックログ
+```
+
+### DDDアーキテクチャ
+
+```mermaid
+graph TD
+    A[Presentation Layer<br>Tauri Commands] --> B[Application Layer<br>Use Cases]
+    B --> C[Domain Layer<br>Entities & Services]
+    B --> D[Infrastructure Layer<br>Database & Repositories]
+    C --> D
+```
+
+## データベース
+
+### 特徴
+
+- **イミュータブルデータモデル**: UPDATE/DELETEなし、INSERT-onlyで履歴管理
+- **バージョン管理**: プロジェクト/タスクの変更履歴を保持
+- **イベント駆動**: タイムトラッキングはイベントの畳み込みで状態導出
+
+### スキーマ
+
+- `projects` / `project_versions`: プロジェクト管理
+- `tasks` / `task_versions`: タスク管理
+- `time_entry_events`: タイムトラッキングイベント
+- `tags` / `task_tag_events`: タグ管理
+
+詳細は `doc/design_doc_time_tracker_go.md` を参照
+
+## ライセンス
+
+MIT License
+
+## 貢献
+
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
+
+---
+
+**バージョン**: 0.1.0  
+**作成者**: tonosama  
+**最終更新**: 2025-08-09

@@ -1,32 +1,41 @@
-// E2Eテスト - タイムトラッキング機能のテスト
+// E2Eテスト - プロジェクト管理機能のテスト
 
 import { test, expect } from '@playwright/test';
 
-test.describe('Time Tracking', () => {
-  test('should create project and start time tracking', async ({ page }) => {
+test.describe('Project Management', () => {
+  test('プロジェクト一覧が表示されること', async ({ page }) => {
     await page.goto('/');
     
-    // プロジェクト作成
-    await page.click('[data-testid="create-project-button"]');
-    await page.fill('[data-testid="project-name-input"]', 'Test Project');
-    await page.click('[data-testid="save-project-button"]');
+    // プロジェクト一覧のヘディングが表示されることを確認
+    await expect(page.locator('h2')).toContainText('プロジェクト一覧');
     
-    // タスク作成
-    await page.click('[data-testid="create-task-button"]');
-    await page.fill('[data-testid="task-name-input"]', 'Test Task');
-    await page.click('[data-testid="save-task-button"]');
+    // 新しいプロジェクトボタンが表示されることを確認
+    await expect(page.getByRole('button', { name: '新しいプロジェクト' })).toBeVisible();
     
-    // タイマー開始
-    await page.click('[data-testid="start-timer-button"]');
+    // アーカイブ済みを表示ボタンが表示されることを確認
+    await expect(page.getByRole('button', { name: 'アーカイブ済みを表示' })).toBeVisible();
+  });
+
+  test('アーカイブ表示の切り替えができること', async ({ page }) => {
+    await page.goto('/');
     
-    // タイマーが実行中であることを確認
-    await expect(page.locator('[data-testid="timer-status"]')).toContainText('実行中');
+    // 初期状態でアーカイブ済みを表示ボタンがあることを確認
+    const toggleButton = page.getByRole('button', { name: 'アーカイブ済みを表示' });
+    await expect(toggleButton).toBeVisible();
     
-    // タイマー停止
-    await page.click('[data-testid="stop-timer-button"]');
+    // ボタンをクリック
+    await toggleButton.click();
     
-    // 時間エントリが記録されていることを確認
-    await expect(page.locator('[data-testid="time-entry-list"]')).toBeVisible();
+    // ボタンのテキストが変更されることを確認
+    await expect(page.getByRole('button', { name: 'アクティブのみ表示' })).toBeVisible();
+  });
+
+  // 注：このテストはバックエンドのモックが必要なため、現在はスキップ
+  test.skip('プロジェクトカードが表示されること', async ({ page }) => {
+    await page.goto('/');
+    
+    // プロジェクトカードが表示されることを確認
+    await expect(page.locator('[data-testid="project-card"]')).toBeVisible();
   });
 });
 

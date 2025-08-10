@@ -42,11 +42,29 @@ graph TD
 ## 4. 詳細設計
 
 ### 技術的アプローチ
-- **フレームワーク:** Tauri
+- **フレームワーク:** Tauri 2.x（2024年10月安定版リリース）
 - **フロントエンド言語/ライブラリ:** TypeScript, React
 - **バックエンド言語:** Rust
 - **データベース:** SQLite (rusqlite クレートを利用)
 - **開発手法:** ドメイン駆動設計（DDD）とテスト駆動開発（TDD）を全面的に採用する。
+
+### Tauri 2.x採用理由
+- **パフォーマンス向上:** Inter-Process Communication（IPC）の再設計により、大きなデータ転送が高速化
+- **モバイル対応:** Android/iOS向けの公式サポート（将来拡張の可能性）
+- **カスタムシリアライゼーション:** bson、protobuf、avro等の使用が可能
+- **最新機能:** HTTPレスポンスヘッダー追加設定、PathResolver改善等の新機能
+- **長期サポート:** 最新安定版による継続的なセキュリティ・機能更新
+
+### Tauri 2.x設定変更点
+- **設定ファイル構造変更:** `tauri.conf.json`の階層が1.xから変更
+  - `build.devPath` → `build.devUrl`
+  - `build.distDir` → `build.frontendDist`
+  - `tauri.windows` → `app.windows`
+  - `tauri.security` → `app.security`
+- **依存関係更新:**
+  - `tauri` crate: `1.0` → `2.0`
+  - `tauri-build` crate: `1.0` → `2.0`
+  - `@tauri-apps/api`: `^1.5.3` → `^2.0.0`
 
 ### 決定事項（確定）
 - **データモデル:** イミュータブル（追記専用）モデルを採用し、UPDATE/DELETEは不使用。
