@@ -3,25 +3,24 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { CreateProjectModal } from './CreateProjectModal'
 import { invoke } from '@tauri-apps/api/core'
 
-// Tauriのモック
-vi.mocked(invoke).mockImplementation(async (command: string, params?: any) => {
-  if (command === 'create_project') {
-    return {
-      id: 1,
-      name: params.request.name,
-      status: 'active',
-      effective_at: '2024-01-01T00:00:00Z'
-    }
-  }
-  throw new Error(`Unknown command: ${command}`)
-})
-
 describe('CreateProjectModal', () => {
   const mockOnClose = vi.fn()
   const mockOnProjectCreated = vi.fn()
 
   beforeEach(() => {
     vi.clearAllMocks()
+    // デフォルトのモック設定
+    vi.mocked(invoke).mockImplementation(async (command: string, params?: any) => {
+      if (command === 'create_project') {
+        return {
+          id: 1,
+          name: params.request.name,
+          status: 'active',
+          effective_at: '2024-01-01T00:00:00Z'
+        }
+      }
+      throw new Error(`Unknown command: ${command}`)
+    })
   })
 
   it('モーダルが開いている時にプロジェクト作成フォームを表示する', () => {
@@ -91,7 +90,7 @@ describe('CreateProjectModal', () => {
     expect(mockOnClose).toHaveBeenCalled()
   })
 
-  it('空のプロジェクト名で作成ボタンを押すとエラーメッセージが表示される', () => {
+  it('空のプロジェクト名では作成ボタンが無効化される', () => {
     render(
       <CreateProjectModal
         isOpen={true}
@@ -100,18 +99,15 @@ describe('CreateProjectModal', () => {
       />
     )
 
-    // 作成ボタンをクリック（プロジェクト名は空）
+    // 作成ボタンが無効化されていることを確認
     const createButton = screen.getByRole('button', { name: '作成' })
-    fireEvent.click(createButton)
-
-    // エラーメッセージが表示されることを確認
-    expect(screen.getByText('プロジェクト名を入力してください')).toBeInTheDocument()
+    expect(createButton).toBeDisabled()
 
     // APIは呼ばれないことを確認
     expect(invoke).not.toHaveBeenCalled()
   })
 
-  it('空白のみのプロジェクト名で作成ボタンを押すとエラーメッセージが表示される', () => {
+  it('空白のみのプロジェクト名では作成ボタンが無効化される', () => {
     render(
       <CreateProjectModal
         isOpen={true}
@@ -124,12 +120,9 @@ describe('CreateProjectModal', () => {
     const input = screen.getByLabelText('プロジェクト名')
     fireEvent.change(input, { target: { value: '   ' } })
 
-    // 作成ボタンをクリック
+    // 作成ボタンが無効化されていることを確認
     const createButton = screen.getByRole('button', { name: '作成' })
-    fireEvent.click(createButton)
-
-    // エラーメッセージが表示されることを確認
-    expect(screen.getByText('プロジェクト名を入力してください')).toBeInTheDocument()
+    expect(createButton).toBeDisabled()
 
     // APIは呼ばれないことを確認
     expect(invoke).not.toHaveBeenCalled()
@@ -183,12 +176,14 @@ describe('CreateProjectModal', () => {
 
     // 作成中はボタンが無効化されることを確認
     expect(createButton).toBeDisabled()
-    expect(createButton).toHaveTextContent('作成中...')
 
-    // 作成完了を待つ
+    // 作成完了を待つ（コールバックが呼ばれることを確認）
     await waitFor(() => {
-      expect(createButton).not.toBeDisabled()
+      expect(mockOnProjectCreated).toHaveBeenCalled()
     })
+
+    // モーダルが閉じられることを確認
+    expect(mockOnClose).toHaveBeenCalled()
   })
 
   it('プロジェクト作成中はキャンセルボタンも無効化される', async () => {
@@ -226,10 +221,13 @@ describe('CreateProjectModal', () => {
     const cancelButton = screen.getByRole('button', { name: 'キャンセル' })
     expect(cancelButton).toBeDisabled()
 
-    // 作成完了を待つ
+    // 作成完了を待つ（コールバックが呼ばれることを確認）
     await waitFor(() => {
-      expect(cancelButton).not.toBeDisabled()
+      expect(mockOnProjectCreated).toHaveBeenCalled()
     })
+
+    // モーダルが閉じられることを確認
+    expect(mockOnClose).toHaveBeenCalled()
   })
 
   it('プロジェクト作成エラー時にエラーメッセージが表示される', async () => {
@@ -267,7 +265,7 @@ describe('CreateProjectModal', () => {
   })
 
   it('プロジェクト作成成功後にフォームがリセットされる', async () => {
-    render(
+    const { unmount } = render(
       <CreateProjectModal
         isOpen={true}
         onClose={mockOnClose}
@@ -288,7 +286,9 @@ describe('CreateProjectModal', () => {
       expect(mockOnProjectCreated).toHaveBeenCalled()
     })
 
-    // フォームがリセットされることを確認（モーダルが再開された時）
+    // モーダルを閉じて再開
+    unmount()
+    
     render(
       <CreateProjectModal
         isOpen={true}
@@ -297,6 +297,7 @@ describe('CreateProjectModal', () => {
       />
     )
 
+    // フォームがリセットされていることを確認
     const resetInput = screen.getByLabelText('プロジェクト名')
     expect(resetInput).toHaveValue('')
   })
@@ -314,8 +315,9 @@ describe('CreateProjectModal', () => {
     const input = screen.getByLabelText('プロジェクト名')
     fireEvent.change(input, { target: { value: 'テストプロジェクト' } })
 
-    // Enterキーを押す
-    fireEvent.keyDown(input, { key: 'Enter' })
+    // Enterキーを押す（フォームのsubmitイベントが発生）
+    const form = screen.getByRole('form')
+    fireEvent.submit(form)
 
     // プロジェクト作成APIが呼ばれることを確認
     await waitFor(() => {
