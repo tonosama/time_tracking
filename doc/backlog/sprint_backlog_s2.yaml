@@ -1,0 +1,243 @@
+# Sprint Backlog Items - Sprint 2
+# Time Tracker Go Project
+# 期間: 2025-08-19 〜 2025-09-01
+# 最終更新: 2025-08-16
+
+sprint_info:
+  sprint_id: "S2"
+  name: "スプリント2"
+  start_date: "2025-08-19"
+  end_date: "2025-09-01"
+  goal: "レポート（集計）とタグ機能実装"
+  status: "planned"
+  team_capacity: 40  # 時間
+  available_capacity: 40  # 時間
+
+# 計画ストーリー
+planned_stories:
+  - story_id: "US-003"
+    title: "手動で時間区間を追加・修正できる"
+    story_points: 5
+    status: "planned"
+    estimated_hours: 8
+    priority: "medium"
+    description: |
+      ユーザーとして、過去の作業時間を手動で追加/修正したい。
+      なぜなら、取りこぼしや誤操作を補正したいから。
+    acceptance_criteria:
+      - "開始時刻・終了時刻・メモを指定して区間を登録できる"
+      - "区間の重複/逆行は検出し、補正方針に従い除外または注記される"
+    technical_notes: "annotateイベント/補正イベントで整合性維持"
+    
+    # タスク分解
+    tasks:
+      - task_id: "T-003-01"
+        title: "手動時間記録UIの実装"
+        description: "時間区間を手動で入力するためのモーダルUIを実装"
+        estimated_hours: 3
+        status: "not_started"
+        assignee: "tonosama"
+        dependencies: []
+        
+      - task_id: "T-003-02"
+        title: "時間区間バリデーション機能の実装"
+        description: "重複・逆行チェックと補正方針の実装"
+        estimated_hours: 2
+        status: "not_started"
+        assignee: "tonosama"
+        dependencies: ["T-003-01"]
+        
+      - task_id: "T-003-03"
+        title: "手動記録APIの実装"
+        description: "手動時間記録のバックエンドAPIを実装"
+        estimated_hours: 2
+        status: "not_started"
+        assignee: "tonosama"
+        dependencies: ["T-003-02"]
+        
+      - task_id: "T-003-04"
+        title: "手動記録機能のテスト実装"
+        description: "手動時間記録機能の包括的なテストを実装"
+        estimated_hours: 1
+        status: "not_started"
+        assignee: "tonosama"
+        dependencies: ["T-003-03"]
+
+  - story_id: "US-004"
+    title: "日/週/月の集計レポートを表示できる"
+    story_points: 5
+    status: "planned"
+    estimated_hours: 12
+    priority: "high"
+    description: |
+      ユーザーとして、期間別の作業時間をタスク/プロジェクト/タグ別に集計して見たい。
+      なぜなら、時間の使い方を把握し改善したいから。
+    acceptance_criteria:
+      - "日/週/月を切替できる"
+      - "タスク/プロジェクト/タグでのグルーピングができる"
+      - "期間・タグ・プロジェクトでフィルタできる"
+    technical_notes: "time_entries_viewで区間を導出しフロントで集計"
+    
+    # タスク分解
+    tasks:
+      - task_id: "T-004-01"
+        title: "レポート画面のUI実装"
+        description: "レポート表示用のダッシュボード画面を実装"
+        estimated_hours: 4
+        status: "not_started"
+        assignee: "tonosama"
+        dependencies: []
+        
+      - task_id: "T-004-02"
+        title: "時間集計ロジックの実装"
+        description: "期間別・グループ別の時間集計機能を実装"
+        estimated_hours: 3
+        status: "not_started"
+        assignee: "tonosama"
+        dependencies: ["T-004-01"]
+        
+      - task_id: "T-004-03"
+        title: "フィルタリング機能の実装"
+        description: "期間・タグ・プロジェクトによるフィルタリング機能を実装"
+        estimated_hours: 2
+        status: "not_started"
+        assignee: "tonosama"
+        dependencies: ["T-004-02"]
+        
+      - task_id: "T-004-04"
+        title: "レポートAPIの実装"
+        description: "レポートデータ取得用のバックエンドAPIを実装"
+        estimated_hours: 2
+        status: "not_started"
+        assignee: "tonosama"
+        dependencies: ["T-004-03"]
+        
+      - task_id: "T-004-05"
+        title: "レポート機能のテスト実装"
+        description: "レポート機能の包括的なテストを実装"
+        estimated_hours: 1
+        status: "not_started"
+        assignee: "tonosama"
+        dependencies: ["T-004-04"]
+
+  - story_id: "US-005"
+    title: "タスクにタグを追加/削除できる"
+    story_points: 3
+    status: "planned"
+    estimated_hours: 6
+    priority: "medium"
+    description: |
+      ユーザーとして、タスクに複数タグを付け外ししたい。
+      なぜなら、後で集計・検索をしやすくしたいから。
+    acceptance_criteria:
+      - "タグの追加/削除がイベントとして保持される"
+      - "現在付与中のタグ一覧が正しく表示される"
+    technical_notes: "task_tag_eventsとtask_tags_currentビューを実装"
+    
+    # タスク分解
+    tasks:
+      - task_id: "T-005-01"
+        title: "タグ管理UIの実装"
+        description: "タグの追加・削除・表示を行うUIを実装"
+        estimated_hours: 2
+        status: "not_started"
+        assignee: "tonosama"
+        dependencies: []
+        
+      - task_id: "T-005-02"
+        title: "タグ管理APIの実装"
+        description: "タグの追加・削除・取得を行うバックエンドAPIを実装"
+        estimated_hours: 2
+        status: "not_started"
+        assignee: "tonosama"
+        dependencies: ["T-005-01"]
+        
+      - task_id: "T-005-03"
+        title: "タグ機能のテスト実装"
+        description: "タグ管理機能の包括的なテストを実装"
+        estimated_hours: 1
+        status: "not_started"
+        assignee: "tonosama"
+        dependencies: ["T-005-02"]
+        
+      - task_id: "T-005-04"
+        title: "タグ機能の統合"
+        description: "レポート機能とタグ機能の統合"
+        estimated_hours: 1
+        status: "not_started"
+        assignee: "tonosama"
+        dependencies: ["T-005-03", "T-004-05"]
+
+# 技術的負債と改善項目
+technical_debt:
+  - item_id: "TD-003"
+    title: "データベースクエリの最適化"
+    description: "レポート集計時のクエリパフォーマンスを最適化"
+    priority: "medium"
+    estimated_hours: 2
+    impact: "パフォーマンス向上"
+    
+  - item_id: "TD-004"
+    title: "UIコンポーネントの再利用性向上"
+    description: "レポート画面で使用するコンポーネントの再利用性を向上"
+    priority: "low"
+    estimated_hours: 1
+    impact: "開発効率向上"
+
+# リスク管理
+risks:
+  - risk_id: "R-003"
+    title: "大量データでのパフォーマンス問題"
+    description: "長時間の使用によりデータ量が増加し、レポート生成が遅くなる可能性"
+    probability: "medium"
+    impact: "medium"
+    mitigation: "段階的なデータ集計とキャッシュ機能の実装"
+    owner: "tonosama"
+    
+  - risk_id: "R-004"
+    title: "タグ機能の複雑性"
+    description: "タグの階層構造や関連性により実装が複雑化する可能性"
+    probability: "low"
+    impact: "medium"
+    mitigation: "シンプルなフラット構造から開始し、段階的に拡張"
+    owner: "tonosama"
+
+# スプリント目標の詳細
+sprint_goals:
+  - goal: "レポート（集計）機能の実装"
+    priority: "high"
+    success_criteria:
+      - "日/週/月の時間集計が表示できる"
+      - "プロジェクト・タスク・タグ別の集計ができる"
+      - "フィルタリング機能が動作する"
+      
+  - goal: "タグ機能の実装"
+    priority: "medium"
+    success_criteria:
+      - "タスクにタグを追加・削除できる"
+      - "タグによる検索・集計ができる"
+      - "タグの一覧表示ができる"
+
+# 依存関係
+dependencies:
+  - from: "S1"
+    items:
+      - "データ暗号化機能の完了"
+      - "基盤テストスイートの整備"
+    impact: "高"
+
+# 受け入れ基準
+acceptance_criteria:
+  - "レポート画面で期間別の時間集計が表示される"
+  - "タグの追加・削除が正常に動作する"
+  - "フィルタリング機能が期待通りに動作する"
+  - "パフォーマンスが許容範囲内である"
+  - "テストカバレッジが90%以上である"
+
+# メトリクス目標
+metrics_goals:
+  velocity_target: 13  # ストーリーポイント
+  quality_targets:
+    test_coverage: "90%"
+    bug_count: "0"
+    performance_target: "レポート生成 < 2秒"

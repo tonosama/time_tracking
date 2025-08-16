@@ -1,0 +1,175 @@
+# Sprint Backlog Items - Sprint 1
+# Time Tracker Go Project
+# 期間: 2025-08-05 〜 2025-08-18
+# 最終更新: 2025-08-16
+
+sprint_info:
+  sprint_id: "S1"
+  name: "スプリント1"
+  start_date: "2025-08-05"
+  end_date: "2025-08-18"
+  goal: "基盤とコア（タスク/タイムトラッキング）実装"
+  status: "in_progress"
+  team_capacity: 40  # 時間
+  remaining_capacity: 8  # 時間
+
+# 完了済みストーリー
+completed_stories:
+  - story_id: "US-001"
+    title: "タスクを作成・編集・削除し、階層で管理できる"
+    story_points: 5
+    status: "done"
+    completed_date: "2025-01-15"
+    actual_hours: 6
+    notes: "タスクの現在値はtask_current_view経由で取得。階層管理UI・E2Eテスト完全実装済み"
+
+  - story_id: "US-002"
+    title: "タスクごとにタイマーを開始/停止できる"
+    story_points: 8
+    status: "done"
+    completed_date: "2025-01-15"
+    actual_hours: 10
+    notes: "time_entry_eventsにstart/stopをINSERT-onlyで記録。UI・排他制御・E2Eテスト完全実装済み"
+
+  - story_id: "US-010"
+    title: "Toggl風のダッシュボード画面を実装する"
+    story_points: 13
+    status: "done"
+    completed_date: "2025-01-15"
+    actual_hours: 16
+    notes: "完全なToggl風UI実装完了。ダッシュボード、タイマーセクション、時間エントリー一覧、プロジェクトサイドバー、レスポンシブデザイン、Toggl配色"
+
+  - story_id: "US-012"
+    title: "プロジェクト一覧表示と作成機能を実装する"
+    story_points: 8
+    status: "done"
+    completed_date: "2025-08-16"
+    actual_hours: 12
+    notes: "ProjectSidebar、CreateProjectModal、Dashboardコンポーネント実装完了。包括的なテストスイート追加済み"
+
+  - story_id: "US-013"
+    title: "包括的なテストスイートを構築する"
+    story_points: 13
+    status: "done"
+    completed_date: "2025-08-16"
+    actual_hours: 18
+    notes: "フロントエンド（Vitest）、バックエンド（Rust）、統合テスト、E2Eテスト（Playwright）実装完了。テストケース修正済み"
+
+# 残存作業
+remaining_stories:
+  - story_id: "US-007"
+    title: "データ暗号化とキー管理を実装する"
+    story_points: 5
+    status: "planned"
+    estimated_hours: 8
+    priority: "high"
+    description: |
+      開発者として、ローカルDBを暗号化し、キーをOS Keychainで安全に管理したい。
+      なぜなら、ユーザーデータの漏えいを防ぐため。
+    acceptance_criteria:
+      - "DBファイルが暗号化されている"
+      - "rekeyで鍵更新が可能である"
+    technical_notes: "SQLCipher, PRAGMA rekey, Keychain連携"
+    
+    # タスク分解
+    tasks:
+      - task_id: "T-007-01"
+        title: "SQLCipherライブラリの導入と設定"
+        description: "RustプロジェクトにSQLCipher依存関係を追加し、暗号化設定を実装"
+        estimated_hours: 2
+        status: "not_started"
+        assignee: "tonosama"
+        dependencies: []
+        
+      - task_id: "T-007-02"
+        title: "データベース暗号化機能の実装"
+        description: "DBファイルの暗号化/復号化機能を実装し、PRAGMA rekeyによる鍵更新機能を追加"
+        estimated_hours: 3
+        status: "not_started"
+        assignee: "tonosama"
+        dependencies: ["T-007-01"]
+        
+      - task_id: "T-007-03"
+        title: "macOS Keychain連携の実装"
+        description: "OS Keychainを使用した暗号化キーの安全な管理機能を実装"
+        estimated_hours: 2
+        status: "not_started"
+        assignee: "tonosama"
+        dependencies: ["T-007-02"]
+        
+      - task_id: "T-007-04"
+        title: "暗号化機能のテスト実装"
+        description: "暗号化/復号化機能のユニットテストと統合テストを実装"
+        estimated_hours: 1
+        status: "not_started"
+        assignee: "tonosama"
+        dependencies: ["T-007-03"]
+
+# 技術的負債と改善項目
+technical_debt:
+  - item_id: "TD-001"
+    title: "エラーハンドリングの統一化"
+    description: "フロントエンド・バックエンド間のエラーハンドリングパターンを統一"
+    priority: "medium"
+    estimated_hours: 2
+    impact: "保守性向上"
+    
+  - item_id: "TD-002"
+    title: "ログレベルの最適化"
+    description: "開発・本番環境に応じたログレベルの調整"
+    priority: "low"
+    estimated_hours: 1
+    impact: "デバッグ効率向上"
+
+# リスク管理
+risks:
+  - risk_id: "R-001"
+    title: "暗号化機能の実装遅延"
+    description: "SQLCipherとKeychain連携の複雑性により実装が遅延する可能性"
+    probability: "medium"
+    impact: "high"
+    mitigation: "段階的な実装と早期テスト"
+    owner: "tonosama"
+    
+  - risk_id: "R-002"
+    title: "パフォーマンス劣化"
+    description: "暗号化によるデータベースアクセス速度の劣化"
+    probability: "low"
+    impact: "medium"
+    mitigation: "パフォーマンステストの実施"
+    owner: "tonosama"
+
+# スプリント目標の達成状況
+sprint_goals_status:
+  - goal: "基盤とコア（タスク/タイムトラッキング）実装"
+    status: "80%"
+    completed_items:
+      - "タスク管理機能（100%）"
+      - "タイムトラッキング機能（50%）"
+      - "UI/UX実装（100%）"
+      - "テストスイート（100%）"
+    remaining_items:
+      - "データ暗号化（0%）"
+
+# 次スプリントへの引き継ぎ事項
+handover_items:
+  - item: "暗号化機能の完了"
+    priority: "high"
+    notes: "スプリント2開始前に完了させる必要あり"
+    
+  - item: "手動時間記録機能の実装"
+    priority: "medium"
+    notes: "スプリント2で実装予定（US-003）"
+    
+  - item: "レポート機能の設計"
+    priority: "medium"
+    notes: "スプリント2の準備として必要"
+
+# メトリクス
+metrics:
+  velocity: 47  # 完了ストーリーポイント
+  burndown_rate: "80%"
+  quality_metrics:
+    test_coverage: "95%"
+    bug_count: 0
+    technical_debt_ratio: "5%"
