@@ -5,7 +5,7 @@ project:
   end_date: "2025-12-31"
   product_owner: "tonosama"
   scrum_master: "tonosama"
-  last_updated: "2025-01-15"
+  last_updated: "2025-08-16"
   description: |
     ローカル環境（macOS）で動作するタイムトラッキングツール。アプリのインストールや外部通信に制約がある環境でも
     タスクの時間計測・記録・分析を容易にし、生産性向上を支援する。データはSQLiteに暗号化保存し、
@@ -18,7 +18,12 @@ sprints:
     start_date: "2025-08-05"
     end_date: "2025-08-18"
     goal: "基盤とコア（タスク/タイムトラッキング）実装"
-    status: "planned"
+    status: "in_progress"
+    progress:
+      completed_stories: 4
+      total_stories: 5
+      completion_percentage: 80
+      notes: "プロジェクト管理機能、テストスイート、UI実装完了。暗号化機能が残存"
   - sprint_id: "S2"
     name: "スプリント2"
     start_date: "2025-08-19"
@@ -56,6 +61,25 @@ epics:
           - "✅ プロジェクト配下にタスクを作成できる（名前・状態）"
           - "✅ タスクの状態をactive/archivedで切替できる"
           - "✅ 階層（プロジェクト→タスク）がUIとデータで一貫している"
+      
+      - story_id: "US-012"
+        title: "プロジェクト一覧表示と作成機能を実装する"
+        description: |
+          ユーザーとして、プロジェクトの一覧を表示し、新しいプロジェクトを作成したい。
+          なぜなら、複数のプロジェクトを効率的に管理したいから。
+        priority: "high"
+        story_points: 8
+        assignee: "tonosama"
+        status: "done"
+        sprint: "S1"
+        completed_date: "2025-08-16"
+        memo: "ProjectSidebar、CreateProjectModal、Dashboardコンポーネント実装完了。包括的なテストスイート追加済み"
+        acceptance_criteria:
+          - "✅ プロジェクト一覧がサイドバーに表示される"
+          - "✅ 新しいプロジェクトを作成できる（モーダル）"
+          - "✅ プロジェクト作成時のバリデーションが機能する"
+          - "✅ プロジェクト作成・一覧取得のAPIが正常に動作する"
+          - "✅ 包括的なテストスイート（ユニット・統合・E2E）が実装されている"
 
   - epic_id: "EP-002"
     title: "時間計測（タイムトラッキング）"
@@ -172,6 +196,26 @@ epics:
         acceptance_criteria:
           - "DBファイルが暗号化されている"
           - "rekeyで鍵更新が可能である"
+      
+      - story_id: "US-013"
+        title: "包括的なテストスイートを構築する"
+        description: |
+          開発者として、フロントエンド・バックエンド・統合・E2Eテストの包括的なテストスイートを構築したい。
+          なぜなら、品質保証とリファクタリングの安全性を確保するため。
+        priority: "high"
+        story_points: 13
+        assignee: "tonosama"
+        status: "done"
+        sprint: "S1"
+        completed_date: "2025-08-16"
+        memo: "フロントエンド（Vitest）、バックエンド（Rust）、統合テスト、E2Eテスト（Playwright）実装完了。テストケース修正済み"
+        acceptance_criteria:
+          - "✅ フロントエンドコンポーネントのユニットテスト（Vitest + Testing Library）"
+          - "✅ バックエンドコマンドのユニットテスト（Rust）"
+          - "✅ Tauriコマンドの統合テスト"
+          - "✅ E2Eテスト（Playwright）によるブラウザテスト"
+          - "✅ テスト実行スクリプトとCI/CD準備"
+          - "✅ テストケースの品質向上と修正"
 
   - epic_id: "EP-006"
     title: "高度な可視化（将来）"
