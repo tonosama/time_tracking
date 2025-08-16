@@ -10,23 +10,67 @@ pub struct DatabaseConnection {
 impl DatabaseConnection {
     /// ファイルベースのデータベースに接続
     pub fn new<P: AsRef<Path>>(database_path: P) -> Result<Self> {
-        let conn = Connection::open(database_path)?;
+        tracing::info!("DatabaseConnection::new: Attempting to connect to database at {:?}", database_path.as_ref());
+        
+        let conn = match Connection::open(database_path.as_ref()) {
+            Ok(conn) => {
+                tracing::info!("DatabaseConnection::new: Successfully opened database connection");
+                conn
+            },
+            Err(e) => {
+                tracing::error!("DatabaseConnection::new: Failed to open database connection: {}", e);
+                return Err(e.into());
+            }
+        };
         
         // WALモードとforeign_keysを有効化
-        conn.pragma_update(None, "journal_mode", "WAL")?;
-        conn.pragma_update(None, "synchronous", "NORMAL")?;
-        conn.pragma_update(None, "foreign_keys", "ON")?;
+        tracing::debug!("DatabaseConnection::new: Setting up database pragmas");
+        
+        if let Err(e) = conn.pragma_update(None, "journal_mode", "WAL") {
+            tracing::error!("DatabaseConnection::new: Failed to set journal_mode to WAL: {}", e);
+            return Err(e.into());
+        }
+        tracing::debug!("DatabaseConnection::new: journal_mode set to WAL");
+        
+        if let Err(e) = conn.pragma_update(None, "synchronous", "NORMAL") {
+            tracing::error!("DatabaseConnection::new: Failed to set synchronous to NORMAL: {}", e);
+            return Err(e.into());
+        }
+        tracing::debug!("DatabaseConnection::new: synchronous set to NORMAL");
+        
+        if let Err(e) = conn.pragma_update(None, "foreign_keys", "ON") {
+            tracing::error!("DatabaseConnection::new: Failed to enable foreign_keys: {}", e);
+            return Err(e.into());
+        }
+        tracing::debug!("DatabaseConnection::new: foreign_keys enabled");
 
+        tracing::info!("DatabaseConnection::new: Database connection setup completed successfully");
         Ok(Self { connection: conn })
     }
 
     /// インメモリデータベースに接続（テスト用）
     pub fn new_in_memory() -> Result<Self> {
-        let conn = Connection::open_in_memory()?;
+        tracing::info!("DatabaseConnection::new_in_memory: Creating in-memory database");
+        
+        let conn = match Connection::open_in_memory() {
+            Ok(conn) => {
+                tracing::info!("DatabaseConnection::new_in_memory: Successfully created in-memory database");
+                conn
+            },
+            Err(e) => {
+                tracing::error!("DatabaseConnection::new_in_memory: Failed to create in-memory database: {}", e);
+                return Err(e.into());
+            }
+        };
         
         // foreign_keysを有効化
-        conn.pragma_update(None, "foreign_keys", "ON")?;
+        if let Err(e) = conn.pragma_update(None, "foreign_keys", "ON") {
+            tracing::error!("DatabaseConnection::new_in_memory: Failed to enable foreign_keys: {}", e);
+            return Err(e.into());
+        }
+        tracing::debug!("DatabaseConnection::new_in_memory: foreign_keys enabled");
 
+        tracing::info!("DatabaseConnection::new_in_memory: In-memory database setup completed successfully");
         Ok(Self { connection: conn })
     }
 
@@ -37,104 +81,103 @@ impl DatabaseConnection {
 
     /// マイグレーションを実行
     pub fn run_migrations(&self) -> Result<()> {
-        self.create_schema()?;
-        self.create_views()?;
+        tracing::info!("DatabaseConnection::run_migrations: Starting database migrations");
+        
+        if let Err(e) = self.create_schema() {
+            tracing::error!("DatabaseConnection::run_migrations: Failed to create schema: {}", e);
+            return Err(e);
+        }
+        
+        if let Err(e) = self.create_views() {
+            tracing::error!("DatabaseConnection::run_migrations: Failed to create views: {}", e);
+            return Err(e);
+        }
+        
+        if let Err(e) = self.load_sample_data() {
+            tracing::error!("DatabaseConnection::run_migrations: Failed to load sample data: {}", e);
+            return Err(e);
+        }
+        
+        tracing::info!("DatabaseConnection::run_migrations: All migrations completed successfully");
         Ok(())
     }
 
     /// 基本スキーマを作成
     fn create_schema(&self) -> Result<()> {
-        self.connection.execute_batch(r#"
-            -- スキーマバージョン管理
-            CREATE TABLE IF NOT EXISTS schema_migrations (
-                version INTEGER PRIMARY KEY,
-                applied_at TEXT NOT NULL
-            );
-
-            -- プロジェクト識別子テーブル
-            CREATE TABLE IF NOT EXISTS projects (
-                id INTEGER PRIMARY KEY
-            );
-
-            -- プロジェクトバージョンテーブル
-            CREATE TABLE IF NOT EXISTS project_versions (
-                id INTEGER PRIMARY KEY,
-                project_id INTEGER NOT NULL,
-                version INTEGER NOT NULL,
-                name TEXT NOT NULL,
-                status TEXT NOT NULL CHECK(status IN ('active','archived')),
-                effective_at TEXT NOT NULL,
-                FOREIGN KEY(project_id) REFERENCES projects(id),
-                UNIQUE(project_id, version)
-            );
-
-            -- タスク識別子テーブル
-            CREATE TABLE IF NOT EXISTS tasks (
-                id INTEGER PRIMARY KEY
-            );
-
-            -- タスクバージョンテーブル
-            CREATE TABLE IF NOT EXISTS task_versions (
-                id INTEGER PRIMARY KEY,
-                task_id INTEGER NOT NULL,
-                version INTEGER NOT NULL,
-                project_id INTEGER NOT NULL,
-                name TEXT NOT NULL,
-                status TEXT NOT NULL CHECK(status IN ('active','archived')),
-                effective_at TEXT NOT NULL,
-                FOREIGN KEY(task_id) REFERENCES tasks(id),
-                FOREIGN KEY(project_id) REFERENCES projects(id),
-                UNIQUE(task_id, version)
-            );
-
-            -- インデックス
-            CREATE INDEX IF NOT EXISTS idx_project_versions_project_version 
-                ON project_versions(project_id, version DESC);
-            CREATE INDEX IF NOT EXISTS idx_task_versions_task_version 
-                ON task_versions(task_id, version DESC);
-        "#)?;
-
-        Ok(())
+        tracing::info!("DatabaseConnection::create_schema: Creating database schema");
+        let schema_sql = include_str!("../../../../database/migrations/001_initial_schema.sql");
+        
+        tracing::debug!("DatabaseConnection::create_schema: Schema SQL length: {} characters", schema_sql.len());
+        
+        match self.connection.execute_batch(schema_sql) {
+            Ok(_) => {
+                tracing::info!("DatabaseConnection::create_schema: Database schema created successfully");
+                Ok(())
+            },
+            Err(e) => {
+                tracing::error!("DatabaseConnection::create_schema: Failed to create database schema: {}", e);
+                tracing::error!("DatabaseConnection::create_schema: Schema SQL: {}", schema_sql);
+                Err(e.into())
+            }
+        }
     }
 
     /// ビューを作成
     fn create_views(&self) -> Result<()> {
-        self.connection.execute_batch(r#"
-            -- プロジェクト現在値ビュー
-            CREATE VIEW IF NOT EXISTS project_current_view AS
-            WITH latest AS (
-                SELECT pv.project_id, MAX(pv.effective_at) AS max_effective_at
-                FROM project_versions pv
-                GROUP BY pv.project_id
-            ), latest_tie_break AS (
-                SELECT pv.project_id, MAX(pv.version) AS max_version
-                FROM project_versions pv
-                JOIN latest l ON l.project_id = pv.project_id AND l.max_effective_at = pv.effective_at
-                GROUP BY pv.project_id
-            )
-            SELECT pv.project_id, pv.name, pv.status, pv.effective_at
-            FROM project_versions pv
-            JOIN latest l ON l.project_id = pv.project_id AND l.max_effective_at = pv.effective_at
-            JOIN latest_tie_break lb ON lb.project_id = pv.project_id AND lb.max_version = pv.version;
+        tracing::info!("DatabaseConnection::create_views: Creating database views");
+        let views_sql = include_str!("../../../../database/migrations/002_views.sql");
+        
+        tracing::debug!("DatabaseConnection::create_views: Views SQL length: {} characters", views_sql.len());
+        
+        match self.connection.execute_batch(views_sql) {
+            Ok(_) => {
+                tracing::info!("DatabaseConnection::create_views: Database views created successfully");
+                Ok(())
+            },
+            Err(e) => {
+                tracing::error!("DatabaseConnection::create_views: Failed to create database views: {}", e);
+                tracing::error!("DatabaseConnection::create_views: Views SQL: {}", views_sql);
+                Err(e.into())
+            }
+        }
+    }
 
-            -- タスク現在値ビュー
-            CREATE VIEW IF NOT EXISTS task_current_view AS
-            WITH latest AS (
-                SELECT tv.task_id, MAX(tv.effective_at) AS max_effective_at
-                FROM task_versions tv
-                GROUP BY tv.task_id
-            ), latest_tie_break AS (
-                SELECT tv.task_id, MAX(tv.version) AS max_version
-                FROM task_versions tv
-                JOIN latest l ON l.task_id = tv.task_id AND l.max_effective_at = tv.effective_at
-                GROUP BY tv.task_id
-            )
-            SELECT tv.task_id, tv.project_id, tv.name, tv.status, tv.effective_at
-            FROM task_versions tv
-            JOIN latest l ON l.task_id = tv.task_id AND l.max_effective_at = tv.effective_at
-            JOIN latest_tie_break lb ON lb.task_id = tv.task_id AND lb.max_version = tv.version;
-        "#)?;
-
+    /// サンプルデータを読み込み
+    fn load_sample_data(&self) -> Result<()> {
+        tracing::info!("DatabaseConnection::load_sample_data: Checking if sample data should be loaded");
+        
+        // プロジェクトが存在しない場合のみサンプルデータを読み込み
+        let project_count: i64 = match self.connection
+            .query_row("SELECT COUNT(*) FROM project_current_view", [], |row| row.get(0)) {
+            Ok(count) => {
+                tracing::debug!("DatabaseConnection::load_sample_data: Found {} existing projects", count);
+                count
+            },
+            Err(e) => {
+                tracing::warn!("DatabaseConnection::load_sample_data: Failed to count projects, assuming 0: {}", e);
+                0
+            }
+        };
+        
+        if project_count == 0 {
+            tracing::info!("DatabaseConnection::load_sample_data: No projects found, loading sample data");
+            let sample_data_sql = include_str!("../../../../database/seeds/sample_data.sql");
+            
+            tracing::debug!("DatabaseConnection::load_sample_data: Sample data SQL length: {} characters", sample_data_sql.len());
+            
+            match self.connection.execute_batch(sample_data_sql) {
+                Ok(_) => {
+                    tracing::info!("DatabaseConnection::load_sample_data: Sample data loaded successfully");
+                },
+                Err(e) => {
+                    tracing::error!("DatabaseConnection::load_sample_data: Failed to load sample data: {}", e);
+                    return Err(e.into());
+                }
+            }
+        } else {
+            tracing::info!("DatabaseConnection::load_sample_data: Projects already exist, skipping sample data load");
+        }
+        
         Ok(())
     }
 }

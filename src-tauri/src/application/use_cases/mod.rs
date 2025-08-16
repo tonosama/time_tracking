@@ -2,7 +2,9 @@
 
 pub mod project_use_cases;
 pub mod task_use_cases;
+pub mod time_tracking_use_cases;
 
 pub use project_use_cases::*;
 pub use task_use_cases::*;
+pub use time_tracking_use_cases::*;
 

@@ -9,6 +9,14 @@ pub struct CreateProjectRequest {
     pub name: String,
 }
 
+impl CreateProjectRequest {
+    pub fn to_command(&self) -> anyhow::Result<crate::application::use_cases::CreateProjectCommand> {
+        Ok(crate::application::use_cases::CreateProjectCommand {
+            name: self.name.clone(),
+        })
+    }
+}
+
 /// プロジェクト更新リクエストDTO
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UpdateProjectRequest {

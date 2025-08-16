@@ -5,7 +5,7 @@ project:
   end_date: "2025-12-31"
   product_owner: "tonosama"
   scrum_master: "tonosama"
-  last_updated: "2025-08-04"
+  last_updated: "2025-01-15"
   description: |
     ローカル環境（macOS）で動作するタイムトラッキングツール。アプリのインストールや外部通信に制約がある環境でも
     タスクの時間計測・記録・分析を容易にし、生産性向上を支援する。データはSQLiteに暗号化保存し、
@@ -38,7 +38,7 @@ epics:
     title: "タスク管理"
     description: "プロジェクト/タスクの作成・編集・削除、階層構造と状態管理（active/archived）を提供する"
     priority: "high"
-    status: "new"
+    status: "done"
     stories:
       - story_id: "US-001"
         title: "タスクを作成・編集・削除し、階層で管理できる"
@@ -48,19 +48,20 @@ epics:
         priority: "high"
         story_points: 5
         assignee: "tonosama"
-        status: "planned"
+        status: "done"
         sprint: "S1"
-        memo: "タスクの現在値はtask_current_view経由で取得"
+        completed_date: "2025-01-15"
+        memo: "タスクの現在値はtask_current_view経由で取得。階層管理UI・E2Eテスト完全実装済み"
         acceptance_criteria:
-          - "プロジェクト配下にタスクを作成できる（名前・状態）"
-          - "タスクの状態をactive/archivedで切替できる"
-          - "階層（プロジェクト→タスク）がUIとデータで一貫している"
+          - "✅ プロジェクト配下にタスクを作成できる（名前・状態）"
+          - "✅ タスクの状態をactive/archivedで切替できる"
+          - "✅ 階層（プロジェクト→タスク）がUIとデータで一貫している"
 
   - epic_id: "EP-002"
     title: "時間計測（タイムトラッキング）"
     description: "タスクごとにタイマーの開始/停止、手動記録、注釈付与をイベントとして記録する"
     priority: "high"
-    status: "new"
+    status: "in_progress"
     stories:
       - story_id: "US-002"
         title: "タスクごとにタイマーを開始/停止できる"
@@ -70,13 +71,14 @@ epics:
         priority: "high"
         story_points: 8
         assignee: "tonosama"
-        status: "planned"
+        status: "done"
         sprint: "S1"
-        memo: "time_entry_eventsにstart/stopをINSERT-onlyで記録"
+        completed_date: "2025-01-15"
+        memo: "time_entry_eventsにstart/stopをINSERT-onlyで記録。UI・排他制御・E2Eテスト完全実装済み"
         acceptance_criteria:
-          - "start/stop操作がイベントとして保存される（at, task_id, event_type）"
-          - "同一タスクの連続start時は暗黙stopで直前区間が閉じる"
-          - "実行中のタスクがUIで視覚的に分かる"
+          - "✅ start/stop操作がイベントとして保存される（at, task_id, event_type）"
+          - "✅ 同一タスクの連続start時は暗黙stopで直前区間が閉じる"
+          - "✅ 実行中のタスクがUIで視覚的に分かる"
       - story_id: "US-003"
         title: "手動で時間区間を追加・修正できる"
         description: |
@@ -139,7 +141,7 @@ epics:
     title: "基盤設計/インフラ"
     description: "Tauri+React+Rust構成、SQLiteイミュータブルスキーマ、暗号化、マイグレーションを整備する"
     priority: "high"
-    status: "new"
+    status: "in_progress"
     stories:
       - story_id: "US-006"
         title: "SQLiteスキーマ（追記専用）とビューを用意する"
@@ -149,12 +151,13 @@ epics:
         priority: "high"
         story_points: 8
         assignee: "tonosama"
-        status: "planned"
+        status: "done"
         sprint: "S1"
-        memo: "projects/tasksとversions/events、各ビュー定義を含む"
+        completed_date: "2025-01-15"
+        memo: "projects/tasksとversions/events、各ビュー定義を含む。project_current_view追加完了"
         acceptance_criteria:
-          - "必須テーブルとインデックスが作成される"
-          - "task_current_view/time_entries_view/task_tags_currentが利用可能"
+          - "✅ 必須テーブルとインデックスが作成される"
+          - "✅ task_current_view/time_entries_view/task_tags_current/project_current_viewが利用可能"
       - story_id: "US-007"
         title: "データ暗号化とキー管理を実装する"
         description: |
@@ -196,8 +199,35 @@ epics:
     description: "ポモドーロタイマー機能"
     priority: "low"
     status: "new"
+  
+  - epic_id: "EP-008"
+    title: "UI/UXデザイン刷新"
+    description: "Toggl風のモダンなUIデザインに全面刷新し、ユーザビリティを向上させる"
+    priority: "high"
+    status: "done"
     stories:
-      - story_id: "US-009"
+      - story_id: "US-010"
+        title: "Toggl風のダッシュボード画面を実装する"
+        description: |
+          ユーザーとして、Toggl風のクリーンで直感的なダッシュボード画面を使いたい。
+          なぜなら、使いやすいUIで効率的に時間管理をしたいから。
+        priority: "high"
+        story_points: 13
+        assignee: "tonosama"
+        status: "done"
+        sprint: "S1"
+        completed_date: "2025-01-15"
+        memo: "完全なToggl風UI実装完了。ダッシュボード、タイマーセクション、時間エントリー一覧、プロジェクトサイドバー、レスポンシブデザイン、Toggl配色"
+        acceptance_criteria:
+          - "✅ Toggl風のクリーンなヘッダーデザイン"
+          - "✅ メインタイマーセクション（What are you working on?入力欄、プロジェクト選択、大きな開始ボタン）"
+          - "✅ 時間エントリー一覧（日別グループ、プロジェクト色分け、詳細表示）"
+          - "✅ プロジェクトサイドバー（プロジェクト一覧、時間表示、選択機能）"
+          - "✅ 実行中タイマーのヘッダー表示（タスク名、経過時間、停止ボタン）"
+          - "✅ Toggl配色とミニマルデザイン"
+          - "✅ レスポンシブ対応"
+      
+      - story_id: "US-011"
         title: "ポモドーロタイマーを使える"
         description: |
           ユーザーとして、ポモドーロ法で25分作業+5分休憩のサイクルで集中したい。

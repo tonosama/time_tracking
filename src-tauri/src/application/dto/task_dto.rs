@@ -10,6 +10,16 @@ pub struct CreateTaskRequest {
     pub name: String,
 }
 
+impl CreateTaskRequest {
+    pub fn to_command(&self) -> anyhow::Result<crate::application::use_cases::CreateTaskCommand> {
+        let project_id = crate::domain::value_objects::ProjectId::new(self.project_id)?;
+        Ok(crate::application::use_cases::CreateTaskCommand {
+            project_id,
+            name: self.name.clone(),
+        })
+    }
+}
+
 /// タスク更新リクエストDTO
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UpdateTaskRequest {

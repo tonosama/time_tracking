@@ -8,7 +8,7 @@ afterEach(() => {
 })
 
 // Tauriのモック
-vi.mock('@tauri-apps/api/tauri', () => ({
+vi.mock('@tauri-apps/api/core', () => ({
   invoke: vi.fn(),
 }))
 

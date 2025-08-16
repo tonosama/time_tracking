@@ -14,17 +14,6 @@ export default defineConfig({
     },
   },
 
-  // テスト設定
-  test: {
-    globals: true,
-    environment: 'jsdom',
-    setupFiles: ['./src/test/setup.ts'],
-    // E2Eテストのみを除外（Playwrightで実行）
-    exclude: [
-      '**/tests/e2e/**'
-    ],
-  },
-
   // パスエイリアス設定
   resolve: {
     alias: {

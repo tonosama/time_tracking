@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { invoke } from '@tauri-apps/api/core'
 import type { Project } from '@/types'
+import { CreateProjectModal } from './CreateProjectModal'
+import { ProjectDetailView } from './ProjectDetailView'
 
 interface ProjectListProps {
   showArchived?: boolean
@@ -11,6 +13,8 @@ export function ProjectList({ showArchived = false }: ProjectListProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isShowingArchived, setIsShowingArchived] = useState(showArchived)
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null)
 
   const loadProjects = async () => {
     try {
@@ -54,6 +58,27 @@ export function ProjectList({ showArchived = false }: ProjectListProps) {
     setIsShowingArchived(!isShowingArchived)
   }
 
+  const handleProjectCreated = (newProject: Project) => {
+    setProjects(prevProjects => [newProject, ...prevProjects])
+    setShowCreateModal(false)
+  }
+
+  const handleProjectSelected = (project: Project) => {
+    setSelectedProject(project)
+  }
+
+  const handleBackToList = () => {
+    setSelectedProject(null)
+    loadProjects() // プロジェクト一覧を再読み込み
+  }
+
+  const handleProjectUpdate = (updatedProject: Project) => {
+    setProjects(prevProjects => 
+      prevProjects.map(p => p.id === updatedProject.id ? updatedProject : p)
+    )
+    setSelectedProject(updatedProject)
+  }
+
   if (loading) {
     return (
       <div className="project-list">
@@ -70,8 +95,18 @@ export function ProjectList({ showArchived = false }: ProjectListProps) {
     )
   }
 
+  // プロジェクト詳細表示の場合
+  if (selectedProject) {
+    return (
+      <ProjectDetailView
+        project={selectedProject}
+        onBack={handleBackToList}
+        onProjectUpdate={handleProjectUpdate}
+      />
+    )
+  }
+
   const activeProjects = projects.filter(p => p.status === 'active')
-  const archivedProjects = projects.filter(p => p.status === 'archived')
 
   return (
     <div className="project-list">
@@ -81,6 +116,7 @@ export function ProjectList({ showArchived = false }: ProjectListProps) {
           <button 
             type="button"
             className="btn btn-primary"
+            onClick={() => setShowCreateModal(true)}
             aria-label="新しいプロジェクト"
           >
             新しいプロジェクト
@@ -105,6 +141,7 @@ export function ProjectList({ showArchived = false }: ProjectListProps) {
               project={project}
               onArchive={handleArchiveProject}
               onRestore={handleRestoreProject}
+              onSelect={() => handleProjectSelected(project)}
             />
           ))
         ) : (
@@ -115,6 +152,7 @@ export function ProjectList({ showArchived = false }: ProjectListProps) {
               project={project}
               onArchive={handleArchiveProject}
               onRestore={handleRestoreProject}
+              onSelect={() => handleProjectSelected(project)}
             />
           ))
         )}
@@ -125,6 +163,12 @@ export function ProjectList({ showArchived = false }: ProjectListProps) {
           <p>プロジェクトがありません</p>
         </div>
       )}
+
+      <CreateProjectModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onProjectCreated={handleProjectCreated}
+      />
     </div>
   )
 }
@@ -133,11 +177,17 @@ interface ProjectCardProps {
   project: Project
   onArchive: (id: number) => void
   onRestore: (id: number) => void
+  onSelect: () => void
 }
 
-function ProjectCard({ project, onArchive, onRestore }: ProjectCardProps) {
+function ProjectCard({ project, onArchive, onRestore, onSelect }: ProjectCardProps) {
   return (
-    <div className="project-card" data-testid="project-card">
+    <div 
+      className="project-card" 
+      data-testid="project-card"
+      onClick={onSelect}
+      style={{ cursor: 'pointer' }}
+    >
       <div className="project-card-header">
         <h3 className="project-name">{project.name}</h3>
         <span className={`project-status ${project.status}`}>
@@ -156,7 +206,10 @@ function ProjectCard({ project, onArchive, onRestore }: ProjectCardProps) {
           <button
             type="button"
             className="btn btn-warning btn-sm"
-            onClick={() => onArchive(project.id)}
+            onClick={(e) => {
+              e.stopPropagation()
+              onArchive(project.id)
+            }}
             aria-label={`プロジェクト${project.id}をアーカイブ`}
           >
             アーカイブ
@@ -165,7 +218,10 @@ function ProjectCard({ project, onArchive, onRestore }: ProjectCardProps) {
           <button
             type="button"
             className="btn btn-success btn-sm"
-            onClick={() => onRestore(project.id)}
+            onClick={(e) => {
+              e.stopPropagation()
+              onRestore(project.id)
+            }}
             aria-label={`プロジェクト${project.id}を復元`}
           >
             復元

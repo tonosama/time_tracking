@@ -2,8 +2,9 @@ use crate::application::dto::{
     CreateProjectRequest, UpdateProjectRequest, ArchiveProjectRequest, 
     RestoreProjectRequest, ProjectDto
 };
+use crate::application::services::ApplicationService;
 use crate::application::use_cases::{
-    ProjectUseCases, CreateProjectCommand, UpdateProjectCommand, 
+    CreateProjectCommand, UpdateProjectCommand, 
     ArchiveProjectCommand, RestoreProjectCommand
 };
 use crate::domain::value_objects::ProjectId;
@@ -12,14 +13,14 @@ use tauri::State;
 /// プロジェクト作成コマンド
 #[tauri::command]
 pub async fn create_project(
+    app_service: State<'_, ApplicationService>,
     request: CreateProjectRequest,
-    project_use_cases: State<'_, Box<dyn ProjectUseCases>>,
 ) -> Result<ProjectDto, String> {
     let command = CreateProjectCommand {
         name: request.name,
     };
 
-    match project_use_cases.create_project(command).await {
+    match app_service.project_use_cases().create_project(command).await {
         Ok(project) => Ok(ProjectDto::from(project)),
         Err(e) => Err(e.to_string()),
     }
@@ -28,8 +29,8 @@ pub async fn create_project(
 /// プロジェクト更新コマンド
 #[tauri::command]
 pub async fn update_project(
+    app_service: State<'_, ApplicationService>,
     request: UpdateProjectRequest,
-    project_use_cases: State<'_, Box<dyn ProjectUseCases>>,
 ) -> Result<ProjectDto, String> {
     let project_id = ProjectId::new(request.id).map_err(|e| e.to_string())?;
     let command = UpdateProjectCommand {
@@ -37,7 +38,7 @@ pub async fn update_project(
         name: request.name,
     };
 
-    match project_use_cases.update_project(command).await {
+    match app_service.project_use_cases().update_project(command).await {
         Ok(project) => Ok(ProjectDto::from(project)),
         Err(e) => Err(e.to_string()),
     }
@@ -46,8 +47,8 @@ pub async fn update_project(
 /// プロジェクトアーカイブコマンド
 #[tauri::command]
 pub async fn archive_project(
+    app_service: State<'_, ApplicationService>,
     request: ArchiveProjectRequest,
-    project_use_cases: State<'_, Box<dyn ProjectUseCases>>,
 ) -> Result<(), String> {
     let project_id = ProjectId::new(request.id).map_err(|e| e.to_string())?;
     let command = ArchiveProjectCommand {
@@ -55,7 +56,7 @@ pub async fn archive_project(
         force: request.force,
     };
 
-    match project_use_cases.archive_project(command).await {
+    match app_service.project_use_cases().archive_project(command).await {
         Ok(_) => Ok(()),
         Err(e) => Err(e.to_string()),
     }
@@ -64,15 +65,15 @@ pub async fn archive_project(
 /// プロジェクト復元コマンド
 #[tauri::command]
 pub async fn restore_project(
+    app_service: State<'_, ApplicationService>,
     request: RestoreProjectRequest,
-    project_use_cases: State<'_, Box<dyn ProjectUseCases>>,
 ) -> Result<ProjectDto, String> {
     let project_id = ProjectId::new(request.id).map_err(|e| e.to_string())?;
     let command = RestoreProjectCommand {
         id: project_id,
     };
 
-    match project_use_cases.restore_project(command).await {
+    match app_service.project_use_cases().restore_project(command).await {
         Ok(project) => Ok(ProjectDto::from(project)),
         Err(e) => Err(e.to_string()),
     }
@@ -81,12 +82,12 @@ pub async fn restore_project(
 /// プロジェクト取得コマンド
 #[tauri::command]
 pub async fn get_project(
+    app_service: State<'_, ApplicationService>,
     id: i64,
-    project_use_cases: State<'_, Box<dyn ProjectUseCases>>,
 ) -> Result<Option<ProjectDto>, String> {
     let project_id = ProjectId::new(id).map_err(|e| e.to_string())?;
 
-    match project_use_cases.get_project(project_id).await {
+    match app_service.project_use_cases().get_project(project_id).await {
         Ok(Some(project)) => Ok(Some(ProjectDto::from(project))),
         Ok(None) => Ok(None),
         Err(e) => Err(e.to_string()),
@@ -96,20 +97,27 @@ pub async fn get_project(
 /// 全アクティブプロジェクト取得コマンド
 #[tauri::command]
 pub async fn get_all_active_projects(
-    project_use_cases: State<'_, Box<dyn ProjectUseCases>>,
+    app_service: State<'_, ApplicationService>,
 ) -> Result<Vec<ProjectDto>, String> {
-    match project_use_cases.get_all_active_projects().await {
+    match app_service.project_use_cases().get_all_active_projects().await {
         Ok(projects) => Ok(projects.into_iter().map(ProjectDto::from).collect()),
-        Err(e) => Err(e.to_string()),
+        Err(e) => {
+            // データが存在しない場合は空の配列を返す
+            if e.to_string().contains("no rows") {
+                Ok(Vec::new())
+            } else {
+                Err(e.to_string())
+            }
+        }
     }
 }
 
 /// 全プロジェクト取得コマンド
 #[tauri::command]
 pub async fn get_all_projects(
-    project_use_cases: State<'_, Box<dyn ProjectUseCases>>,
+    app_service: State<'_, ApplicationService>,
 ) -> Result<Vec<ProjectDto>, String> {
-    match project_use_cases.get_all_projects().await {
+    match app_service.project_use_cases().get_all_projects().await {
         Ok(projects) => Ok(projects.into_iter().map(ProjectDto::from).collect()),
         Err(e) => Err(e.to_string()),
     }
@@ -118,12 +126,12 @@ pub async fn get_all_projects(
 /// プロジェクト履歴取得コマンド
 #[tauri::command]
 pub async fn get_project_history(
+    app_service: State<'_, ApplicationService>,
     id: i64,
-    project_use_cases: State<'_, Box<dyn ProjectUseCases>>,
 ) -> Result<Vec<ProjectDto>, String> {
     let project_id = ProjectId::new(id).map_err(|e| e.to_string())?;
 
-    match project_use_cases.get_project_history(project_id).await {
+    match app_service.project_use_cases().get_project_history(project_id).await {
         Ok(projects) => Ok(projects.into_iter().map(ProjectDto::from).collect()),
         Err(e) => Err(e.to_string()),
     }

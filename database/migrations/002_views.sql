@@ -1,7 +1,28 @@
 -- ビュー定義 - 現在値導出用のビュー
 
+-- プロジェクト現在値ビュー
+CREATE VIEW IF NOT EXISTS project_current_view AS
+WITH latest AS (
+  SELECT pv.project_id, MAX(pv.effective_at) AS max_effective_at
+  FROM project_versions pv
+  GROUP BY pv.project_id
+), latest_tie_break AS (
+  SELECT pv.project_id, MAX(pv.version) AS max_version
+  FROM project_versions pv
+  JOIN latest l
+    ON l.project_id = pv.project_id
+   AND l.max_effective_at = pv.effective_at
+  GROUP BY pv.project_id
+)
+SELECT pv.project_id, pv.name, pv.status, pv.effective_at
+FROM project_versions pv
+JOIN latest l
+  ON l.project_id = pv.project_id AND l.max_effective_at = pv.effective_at
+JOIN latest_tie_break lb
+  ON lb.project_id = pv.project_id AND lb.max_version = pv.version;
+
 -- タスク現在値ビュー
-CREATE VIEW task_current_view AS
+CREATE VIEW IF NOT EXISTS task_current_view AS
 WITH latest AS (
   SELECT tv.task_id, MAX(tv.effective_at) AS max_effective_at
   FROM task_versions tv
@@ -22,7 +43,7 @@ JOIN latest_tie_break lb
   ON lb.task_id = tv.task_id AND lb.max_version = tv.version;
 
 -- 時間エントリビュー
-CREATE VIEW time_entries_view AS
+CREATE VIEW IF NOT EXISTS time_entries_view AS
 WITH starts AS (
   SELECT
     id AS start_event_id,
@@ -36,6 +57,7 @@ WITH starts AS (
     s.task_id,
     s.start_event_id,
     s.start_time,
+    s.next_start_time,
     (
       SELECT st.at
       FROM time_entry_events st
@@ -57,11 +79,12 @@ SELECT
     WHEN COALESCE(stop_time, next_start_time) IS NOT NULL
     THEN CAST((julianday(COALESCE(stop_time, next_start_time)) - julianday(start_time)) * 86400 AS INTEGER)
     ELSE NULL
-  END AS duration_in_seconds
+  END AS duration_in_seconds,
+  next_start_time
 FROM paired;
 
 -- 現在タグ集合ビュー
-CREATE VIEW task_tags_current AS
+CREATE VIEW IF NOT EXISTS task_tags_current AS
 WITH ranked AS (
   SELECT
     tte.task_id,

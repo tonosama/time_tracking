@@ -7,12 +7,12 @@ CREATE TABLE IF NOT EXISTS schema_migrations (
 );
 
 -- プロジェクト識別子テーブル
-CREATE TABLE projects (
+CREATE TABLE IF NOT EXISTS projects (
   id INTEGER PRIMARY KEY
 );
 
 -- プロジェクトバージョンテーブル
-CREATE TABLE project_versions (
+CREATE TABLE IF NOT EXISTS project_versions (
   id INTEGER PRIMARY KEY,
   project_id INTEGER NOT NULL,
   version INTEGER NOT NULL,
@@ -24,12 +24,12 @@ CREATE TABLE project_versions (
 );
 
 -- タスク識別子テーブル
-CREATE TABLE tasks (
+CREATE TABLE IF NOT EXISTS tasks (
   id INTEGER PRIMARY KEY
 );
 
 -- タスクバージョンテーブル
-CREATE TABLE task_versions (
+CREATE TABLE IF NOT EXISTS task_versions (
   id INTEGER PRIMARY KEY,
   task_id INTEGER NOT NULL,
   version INTEGER NOT NULL,
@@ -43,7 +43,7 @@ CREATE TABLE task_versions (
 );
 
 -- タイムエントリイベントテーブル
-CREATE TABLE time_entry_events (
+CREATE TABLE IF NOT EXISTS time_entry_events (
   id INTEGER PRIMARY KEY,
   task_id INTEGER NOT NULL,
   event_type TEXT NOT NULL CHECK(event_type IN ('start','stop','annotate')),
@@ -54,13 +54,13 @@ CREATE TABLE time_entry_events (
 );
 
 -- タグマスタテーブル
-CREATE TABLE tags (
+CREATE TABLE IF NOT EXISTS tags (
   id INTEGER PRIMARY KEY,
   name TEXT NOT NULL UNIQUE
 );
 
 -- タスクタグイベントテーブル
-CREATE TABLE task_tag_events (
+CREATE TABLE IF NOT EXISTS task_tag_events (
   id INTEGER PRIMARY KEY,
   task_id INTEGER NOT NULL,
   tag_id INTEGER NOT NULL,
@@ -71,8 +71,8 @@ CREATE TABLE task_tag_events (
 );
 
 -- インデックス
-CREATE INDEX idx_project_versions_project_version ON project_versions(project_id, version DESC);
-CREATE INDEX idx_task_versions_task_version ON task_versions(task_id, version DESC);
-CREATE INDEX idx_time_entry_events_task_at ON time_entry_events(task_id, at);
-CREATE INDEX idx_task_tag_events_task_tag_at ON task_tag_events(task_id, tag_id, at);
+CREATE INDEX IF NOT EXISTS idx_project_versions_project_version ON project_versions(project_id, version DESC);
+CREATE INDEX IF NOT EXISTS idx_task_versions_task_version ON task_versions(task_id, version DESC);
+CREATE INDEX IF NOT EXISTS idx_time_entry_events_task_at ON time_entry_events(task_id, at);
+CREATE INDEX IF NOT EXISTS idx_task_tag_events_task_tag_at ON task_tag_events(task_id, tag_id, at);
 

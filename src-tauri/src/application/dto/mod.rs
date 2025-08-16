@@ -2,7 +2,9 @@
 
 pub mod project_dto;
 pub mod task_dto;
+pub mod time_entry_dto;
 
 pub use project_dto::*;
 pub use task_dto::*;
+pub use time_entry_dto::*;
 

@@ -4,4 +4,5 @@ export * from './dateUtils';
 export * from './formatUtils';
 export * from './validationUtils';
 export * from './constants';
+export * from './logger';
 
