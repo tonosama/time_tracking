@@ -1,4 +1,7 @@
-import { Project } from '@/types'
+import { useState } from 'react'
+import { Project, Task } from '@/types'
+import { ProjectEditButton } from '../projects/ProjectEditButton'
+import { ManualEntryModal } from '../time_tracking/ManualEntryModal'
 
 interface TimerSectionProps {
   taskDescription: string
@@ -6,8 +9,11 @@ interface TimerSectionProps {
   selectedProject: Project | null
   onProjectChange: (project: Project | null) => void
   projects: Project[]
+  tasks: Task[]
   onStartTimer: () => void
   isRunning: boolean
+  onProjectEdit?: (project: Project) => void
+  onManualEntrySuccess?: () => void
 }
 
 export function TimerSection({
@@ -16,9 +22,29 @@ export function TimerSection({
   selectedProject,
   onProjectChange,
   projects,
+  tasks,
   onStartTimer,
-  isRunning
+  isRunning,
+  onProjectEdit,
+  onManualEntrySuccess
 }: TimerSectionProps) {
+  const [showManualEntryModal, setShowManualEntryModal] = useState(false)
+
+  const handleManualEntryClick = () => {
+    console.log('Manual entry button clicked')
+    setShowManualEntryModal(true)
+  }
+
+  const handleManualEntryClose = () => {
+    console.log('Manual entry modal closed')
+    setShowManualEntryModal(false)
+  }
+
+  const handleManualEntrySuccess = () => {
+    console.log('Manual entry added successfully')
+    setShowManualEntryModal(false)
+    onManualEntrySuccess?.()
+  }
   return (
     <div className="timer-section">
       <div className="timer-input-container">
@@ -34,23 +60,36 @@ export function TimerSection({
       
       <div className="timer-controls">
         <div className="timer-selectors">
-          <select
-            className="project-selector"
-            value={selectedProject?.id || ''}
-            onChange={(e) => {
-              const projectId = parseInt(e.target.value)
-              const project = projects.find(p => p.id === projectId) || null
-              onProjectChange(project)
-            }}
-            disabled={isRunning}
-          >
-            <option value="">📁 Select Project</option>
-            {projects.map(project => (
-              <option key={project.id} value={project.id}>
-                📁 {project.name}
-              </option>
-            ))}
-          </select>
+          <div className="project-selector-container">
+            <select
+              className="project-selector"
+              value={selectedProject?.id || ''}
+              onChange={(e) => {
+                const projectId = parseInt(e.target.value)
+                const project = projects.find(p => p.id === projectId) || null
+                onProjectChange(project)
+              }}
+              disabled={isRunning}
+            >
+              <option value="">📁 Select Project</option>
+              {projects.map(project => (
+                <option key={project.id} value={project.id}>
+                  📁 {project.name}
+                </option>
+              ))}
+            </select>
+            {selectedProject && onProjectEdit && (
+              <ProjectEditButton
+                onClick={() => {
+                  console.log('TimerSection ProjectEditButton onClick', { selectedProject });
+                  onProjectEdit(selectedProject);
+                }}
+                aria-label={`プロジェクト「${selectedProject.name}」を編集`}
+                className="project-selector-edit-btn"
+              />
+            )}
+
+          </div>
           
           <button className="tag-selector" disabled={isRunning}>
             🏷️ Tags
@@ -67,8 +106,24 @@ export function TimerSection({
       </div>
       
       <div className="manual-entry">
-        <button className="manual-entry-link">+ Add time manually</button>
+        <button 
+          className="manual-entry-link"
+          onClick={handleManualEntryClick}
+          type="button"
+        >
+          + Add time manually
+        </button>
       </div>
+
+      {/* 手動時間追加モーダル */}
+      <ManualEntryModal
+        isOpen={showManualEntryModal}
+        onClose={handleManualEntryClose}
+        onSuccess={handleManualEntrySuccess}
+        selectedProject={selectedProject || undefined}
+        projects={projects}
+        tasks={tasks}
+      />
     </div>
   )
 }

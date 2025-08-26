@@ -3,4 +3,5 @@
 export * from './TimerButton'
 export * from './GlobalTimer'
 export * from './TimeHistoryModal'
+export * from './ManualEntryModal'
 
