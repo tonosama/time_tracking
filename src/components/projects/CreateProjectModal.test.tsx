@@ -232,7 +232,7 @@ describe('CreateProjectModal', () => {
 
   it('プロジェクト作成エラー時にエラーメッセージが表示される', async () => {
     // プロジェクト作成でエラーを発生させる
-    vi.mocked(invoke).mockImplementation(async (command: string, params?: any) => {
+    vi.mocked(invoke).mockImplementation(async (command: string, _params?: any) => {  // paramsに_プレフィックス追加
       if (command === 'create_project') {
         throw new Error('プロジェクト作成に失敗しました')
       }

@@ -10,3 +10,6 @@ pub use task_commands::*;
 pub use time_tracking_commands::*;
 pub use logging_commands::*;
 
+// デバッグ用コマンド
+pub use task_commands::debug_database_state;
+

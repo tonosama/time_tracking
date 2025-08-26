@@ -198,12 +198,18 @@ impl<T: TimeEntryRepository, K: TaskRepository, S: TimeTrackingService>
     }
 
     async fn get_recent_entries(&self, limit: usize) -> anyhow::Result<Vec<TimeEntry>> {
+        println!("[USECASE] get_recent_entries called with limit: {}", limit);
+        eprintln!("[USECASE] get_recent_entries called with limit: {}", limit);
+        
         tracing::info!("TimeTrackingUseCasesImpl::get_recent_entries: Starting with limit: {}", limit);
         
         tracing::debug!("TimeTrackingUseCasesImpl::get_recent_entries: Calling time_entry_repository.find_recent_entries");
         
         match self.time_entry_repository.find_recent_entries(limit).await {
             Ok(entries) => {
+                println!("[USECASE] get_recent_entries success - {} entries returned", entries.len());
+                eprintln!("[USECASE] get_recent_entries success - {} entries returned", entries.len());
+                
                 tracing::info!("TimeTrackingUseCasesImpl::get_recent_entries: Repository call successful - {} entries returned", entries.len());
                 
                 // エントリーの詳細をログ出力
@@ -221,16 +227,25 @@ impl<T: TimeEntryRepository, K: TaskRepository, S: TimeTrackingService>
                 Ok(entries)
             },
             Err(e) => {
+                println!("[USECASE] get_recent_entries failed: {}", e);
+                eprintln!("[USECASE] get_recent_entries failed: {}", e);
+                
                 tracing::error!("TimeTrackingUseCasesImpl::get_recent_entries: Repository call failed: {}", e);
                 tracing::error!("TimeTrackingUseCasesImpl::get_recent_entries: Error type: {}", std::any::type_name_of_val(&*e));
                 tracing::error!("TimeTrackingUseCasesImpl::get_recent_entries: Error details: {:?}", e);
                 
                 // エラーの種類に応じた詳細情報
                 if let Some(db_error) = e.downcast_ref::<rusqlite::Error>() {
+                    println!("[USECASE] get_recent_entries SQLite error: {:?}", db_error);
+                    eprintln!("[USECASE] get_recent_entries SQLite error: {:?}", db_error);
+                    
                     tracing::error!("TimeTrackingUseCasesImpl::get_recent_entries: SQLite error: {:?}", db_error);
                 }
                 
                 if let Some(anyhow_error) = e.downcast_ref::<anyhow::Error>() {
+                    println!("[USECASE] get_recent_entries Anyhow error: {:?}", anyhow_error);
+                    eprintln!("[USECASE] get_recent_entries Anyhow error: {:?}", anyhow_error);
+                    
                     tracing::error!("TimeTrackingUseCasesImpl::get_recent_entries: Anyhow error: {:?}", anyhow_error);
                 }
                 

@@ -55,7 +55,7 @@ export function CreateProjectModal({ isOpen, onClose, onProjectCreated }: Create
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="新しいプロジェクト">
-      <form onSubmit={handleSubmit} className="create-project-form">
+      <form onSubmit={handleSubmit} className="create-project-form" role="form">
         <Input
           label="プロジェクト名"
           value={name}

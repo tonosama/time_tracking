@@ -8,9 +8,18 @@ afterEach(() => {
 })
 
 // Tauriのモック
+const mockInvoke = vi.fn()
 vi.mock('@tauri-apps/api/core', () => ({
-  invoke: vi.fn(),
+  invoke: mockInvoke,
 }))
+
+// window.__TAURI__のモック
+Object.defineProperty(window, '__TAURI__', {
+  writable: true,
+  value: {
+    invoke: mockInvoke,
+  },
+})
 
 // グローバル設定
 Object.defineProperty(window, 'matchMedia', {
@@ -26,3 +35,23 @@ Object.defineProperty(window, 'matchMedia', {
     dispatchEvent: vi.fn(),
   })),
 })
+
+// Loggerのモック
+vi.mock('@/utils', () => ({
+  Logger: {
+    debug: vi.fn(),
+    error: vi.fn(),
+    warn: vi.fn(),
+    info: vi.fn(),
+    userAction: vi.fn(),
+    apiCall: vi.fn(),
+    apiSuccess: vi.fn(),
+    apiError: vi.fn(),
+    performance: vi.fn(),
+  },
+  groupEntriesByDate: vi.fn(() => ({})),
+  formatDuration: vi.fn(() => '00:00:00'),
+}));
+
+// グローバルでモックを利用可能にする
+(global as any).mockInvoke = mockInvoke  // 型アサーションを追加

@@ -305,9 +305,12 @@ pub async fn is_task_running(
 #[tauri::command]
 pub async fn get_time_entries(
     app_service: State<'_, ApplicationService>,
-    _start_date: String,
+    #[allow(non_snake_case)] startDate: String,
 ) -> Result<Vec<TimeEntryResponse>, String> {
-    tracing::info!("get_time_entries: Command called with start_date: {}", _start_date);
+    println!("[BACKEND] get_time_entries called with startDate: {}", startDate);
+    eprintln!("[BACKEND] get_time_entries called with startDate: {}", startDate);
+    
+    tracing::info!("get_time_entries: Command called with startDate: {}", startDate);
     tracing::info!("get_time_entries: Command execution started");
     tracing::info!("get_time_entries: About to call app_service.time_tracking_use_cases().get_recent_entries(100)");
     
@@ -320,6 +323,9 @@ pub async fn get_time_entries(
         .await
     {
         Ok(entries) => {
+            println!("[BACKEND] get_time_entries success - {} entries returned", entries.len());
+            eprintln!("[BACKEND] get_time_entries success - {} entries returned", entries.len());
+            
             tracing::info!("get_time_entries: Use case call successful - {} entries returned", entries.len());
             
             tracing::debug!("get_time_entries: Converting entries to TimeEntryResponse");
@@ -342,12 +348,18 @@ pub async fn get_time_entries(
             Ok(responses)
         },
         Err(e) => {
+            println!("[BACKEND] get_time_entries failed: {}", e);
+            eprintln!("[BACKEND] get_time_entries failed: {}", e);
+            
             tracing::error!("get_time_entries: Use case call failed: {}", e);
             tracing::error!("get_time_entries: Error type: {}", std::any::type_name_of_val(&*e));
             tracing::error!("get_time_entries: Error details: {:?}", e);
             
             // エラーの種類に応じた詳細情報
             if let Some(db_error) = e.downcast_ref::<rusqlite::Error>() {
+                println!("[BACKEND] get_time_entries SQLite error: {:?}", db_error);
+                eprintln!("[BACKEND] get_time_entries SQLite error: {:?}", db_error);
+                
                 tracing::error!("get_time_entries: SQLite error: {:?}", db_error);
                 match db_error {
                     rusqlite::Error::QueryReturnedNoRows => {
@@ -366,19 +378,37 @@ pub async fn get_time_entries(
             }
             
             if let Some(anyhow_error) = e.downcast_ref::<anyhow::Error>() {
+                println!("[BACKEND] get_time_entries Anyhow error: {:?}", anyhow_error);
+                eprintln!("[BACKEND] get_time_entries Anyhow error: {:?}", anyhow_error);
+                
                 tracing::error!("get_time_entries: Anyhow error: {:?}", anyhow_error);
             }
             
             // データが存在しない場合は空の配列を返す
             if e.to_string().contains("no rows") {
+                println!("[BACKEND] get_time_entries: No rows found, returning empty array");
+                eprintln!("[BACKEND] get_time_entries: No rows found, returning empty array");
+                
                 tracing::info!("get_time_entries: No rows found, returning empty array");
                 Ok(Vec::new())
             } else {
+                println!("[BACKEND] get_time_entries: Returning error to frontend: {}", e);
+                eprintln!("[BACKEND] get_time_entries: Returning error to frontend: {}", e);
+                
                 tracing::error!("get_time_entries: Returning error to frontend: {}", e);
                 Err(e.to_string())
             }
         }
     }
+}
+
+/// テスト用の簡単なコマンド
+#[tauri::command]
+pub async fn test_get_time_entries() -> Result<String, String> {
+    println!("[BACKEND] test_get_time_entries called");
+    eprintln!("[BACKEND] test_get_time_entries called");
+    
+    Ok("test_get_time_entries: Command is working!".to_string())
 }
 
 /// 全体のタイマーステータスを取得する（パラメータ不要版）

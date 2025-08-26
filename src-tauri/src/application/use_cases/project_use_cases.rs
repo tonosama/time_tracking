@@ -164,7 +164,21 @@ impl<R: ProjectRepository, S: ProjectManagementService> ProjectUseCases for Proj
     }
 
     async fn get_all_active_projects(&self) -> anyhow::Result<Vec<Project>> {
-        self.repository.find_all_active().await
+        println!("[USECASE] get_all_active_projects called");
+        eprintln!("[USECASE] get_all_active_projects called");
+        
+        let result = self.repository.find_all_active().await;
+        match &result {
+            Ok(projects) => {
+                println!("[USECASE] Repository returned {} active projects", projects.len());
+                eprintln!("[USECASE] Repository returned {} active projects", projects.len());
+            },
+            Err(e) => {
+                println!("[USECASE] Repository error: {}", e);
+                eprintln!("[USECASE] Repository error: {}", e);
+            }
+        }
+        result
     }
 
     async fn get_all_projects(&self) -> anyhow::Result<Vec<Project>> {

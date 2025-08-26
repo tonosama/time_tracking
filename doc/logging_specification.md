@@ -297,7 +297,7 @@ const startTimer = async (taskId: number) => {
   Logger.debug('Timer', 'Starting timer', { taskId });
   
   try {
-    await invoke('start_timer', { task_id: taskId });
+    await invoke('start_timer', { request: { task_id: taskId } });
     Logger.info('Timer', 'Timer started successfully', { taskId });
   } catch (error) {
     Logger.error('Timer', 'Failed to start timer', { taskId, error: error.message });

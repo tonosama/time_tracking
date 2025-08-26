@@ -30,33 +30,40 @@ export default defineConfig({
     
     // トレース設定（失敗時のみ）
     trace: 'on-first-retry',
+    
+    // タイムアウト設定
+    actionTimeout: 10000,
+    navigationTimeout: 30000,
+    
+    // スクリーンショット設定
+    screenshot: 'only-on-failure',
+    
+    // ビデオ録画設定
+    video: 'retain-on-failure',
+    
+    // ブラウザを表示する設定
+    headless: false,
   },
 
   // プロジェクト設定（ブラウザ別）
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: { 
+        ...devices['Desktop Chrome'],
+        // ブラウザを表示する設定
+        headless: false,
+      },
     },
 
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
-
-    // モバイルブラウザ（必要に応じて有効化）
+    // 開発時はChromiumのみ使用（高速化）
     // {
-    //   name: 'Mobile Chrome',
-    //   use: { ...devices['Pixel 5'] },
+    //   name: 'firefox',
+    //   use: { ...devices['Desktop Firefox'] },
     // },
     // {
-    //   name: 'Mobile Safari',
-    //   use: { ...devices['iPhone 12'] },
+    //   name: 'webkit',
+    //   use: { ...devices['Desktop Safari'] },
     // },
   ],
 
@@ -65,6 +72,8 @@ export default defineConfig({
     command: 'npm run tauri:dev',
     url: 'http://127.0.0.1:1420',
     reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000, // 2分のタイムアウト
+    timeout: 180 * 1000, // 3分のタイムアウト（Tauri起動時間を考慮）
+    stdout: 'pipe',
+    stderr: 'pipe',
   },
 });

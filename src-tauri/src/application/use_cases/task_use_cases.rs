@@ -82,25 +82,84 @@ impl<T: TaskRepository, P: ProjectRepository> TaskUseCasesImpl<T, P> {
 #[async_trait]
 impl<T: TaskRepository, P: ProjectRepository> TaskUseCases for TaskUseCasesImpl<T, P> {
     async fn create_task(&self, command: CreateTaskCommand) -> anyhow::Result<Task> {
+        eprintln!("[USECASE] create_task called with command: {:?}", command);
+        println!("[USECASE] create_task called with command: {:?}", command);
+        
         // プロジェクトの存在確認
-        let project = self.project_repository.find_by_id(command.project_id).await?
-            .ok_or_else(|| anyhow::anyhow!("Project not found"))?;
+        eprintln!("[USECASE] Checking if project exists: {:?}", command.project_id);
+        println!("[USECASE] Checking if project exists: {:?}", command.project_id);
+        let project = match self.project_repository.find_by_id(command.project_id).await {
+            Ok(Some(project)) => {
+                eprintln!("[USECASE] Project found: {:?}", project);
+                println!("[USECASE] Project found: {:?}", project);
+                project
+            },
+            Ok(None) => {
+                eprintln!("[USECASE] Project not found: {:?}", command.project_id);
+                println!("[USECASE] Project not found: {:?}", command.project_id);
+                return Err(anyhow::anyhow!("Project not found"));
+            },
+            Err(e) => {
+                eprintln!("[USECASE] Error finding project: {}", e);
+                println!("[USECASE] Error finding project: {}", e);
+                return Err(e);
+            }
+        };
 
         // アーカイブ済みプロジェクトにはタスクを作成できない
         if project.is_archived() {
+            eprintln!("[USECASE] Project is archived: {:?}", project);
+            println!("[USECASE] Project is archived: {:?}", project);
             return Err(anyhow::anyhow!("Cannot create task in archived project"));
         }
 
         // 新しいIDを生成
-        let id = self.task_repository.next_id().await?;
+        eprintln!("[USECASE] Generating new task ID");
+        println!("[USECASE] Generating new task ID");
+        let id = match self.task_repository.next_id().await {
+            Ok(id) => {
+                eprintln!("[USECASE] New task ID generated: {:?}", id);
+                println!("[USECASE] New task ID generated: {:?}", id);
+                id
+            },
+            Err(e) => {
+                eprintln!("[USECASE] Failed to generate task ID: {}", e);
+                println!("[USECASE] Failed to generate task ID: {}", e);
+                return Err(e);
+            }
+        };
         
         // タスクを作成
-        let task = Task::new(id, command.project_id, command.name)?;
+        eprintln!("[USECASE] Creating task with ID: {:?}, project_id: {:?}, name: {}", id, command.project_id, command.name);
+        println!("[USECASE] Creating task with ID: {:?}, project_id: {:?}, name: {}", id, command.project_id, command.name);
+        let task = match Task::new(id, command.project_id, command.name) {
+            Ok(task) => {
+                eprintln!("[USECASE] Task created successfully: {:?}", task);
+                println!("[USECASE] Task created successfully: {:?}", task);
+                task
+            },
+            Err(e) => {
+                eprintln!("[USECASE] Failed to create task: {}", e);
+                println!("[USECASE] Failed to create task: {}", e);
+                return Err(e);
+            }
+        };
         
         // 保存
-        self.task_repository.save(&task).await?;
-        
-        Ok(task)
+        eprintln!("[USECASE] Saving task to repository");
+        println!("[USECASE] Saving task to repository");
+        match self.task_repository.save(&task).await {
+            Ok(_) => {
+                eprintln!("[USECASE] Task saved successfully");
+                println!("[USECASE] Task saved successfully");
+                Ok(task)
+            },
+            Err(e) => {
+                eprintln!("[USECASE] Failed to save task: {}", e);
+                println!("[USECASE] Failed to save task: {}", e);
+                Err(e)
+            }
+        }
     }
 
     async fn update_task(&self, command: UpdateTaskCommand) -> anyhow::Result<Task> {

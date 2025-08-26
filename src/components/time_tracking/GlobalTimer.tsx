@@ -5,7 +5,11 @@ import type { CurrentTimer, Task } from '@/types'
 
 
 
-export function GlobalTimer() {
+interface GlobalTimerProps {
+  onTimerStopped?: () => void
+}
+
+export function GlobalTimer({ onTimerStopped }: GlobalTimerProps) {
   const [currentTimer, setCurrentTimer] = useState<CurrentTimer | null>(null)
   const [currentTask, setCurrentTask] = useState<Task | null>(null)
   const [elapsedSeconds, setElapsedSeconds] = useState<number>(0)
@@ -24,19 +28,37 @@ export function GlobalTimer() {
         startTimeRef.current = new Date(Date.now() - timer.elapsed_seconds * 1000)
         setIsVisible(true)
         
-        // タスク情報も取得（バックエンドにAPIがあると仮定）
-        // 実際の実装では、TaskApiから取得する必要があります
-        // const task = await TaskApi.getTask(timer.task_id)
-        // setCurrentTask(task)
-        
-        // 仮のタスク情報
-        setCurrentTask({
-          id: timer.task_id,
-          project_id: 1,
-          name: `タスク ${timer.task_id}`,
-          status: 'active',
-          effective_at: new Date().toISOString()
-        })
+        // 実際のタスク情報を取得
+        try {
+          console.log(`[GlobalTimer] タスク取得開始: task_id=${timer.task_id}`)
+          const task = await TimeTrackingApi.getTask(timer.task_id)
+          console.log(`[GlobalTimer] タスク取得結果:`, task)
+          
+          if (task) {
+            console.log(`[GlobalTimer] タスク取得成功: task_id=${task.id}, name=${task.name}`)
+            setCurrentTask(task)
+          } else {
+            console.warn(`[GlobalTimer] タスクが見つかりません: task_id=${timer.task_id}`)
+            // タスクが見つからない場合は仮のタスク情報を使用
+            setCurrentTask({
+              id: timer.task_id,
+              project_id: 1,
+              name: `タスク ${timer.task_id}`,
+              status: 'active',
+              effective_at: new Date().toISOString()
+            })
+          }
+        } catch (taskErr) {
+          console.error('[GlobalTimer] タスク取得エラー:', taskErr)
+          // タスク取得に失敗した場合は仮のタスク情報を使用
+          setCurrentTask({
+            id: timer.task_id,
+            project_id: 1,
+            name: `タスク ${timer.task_id}`,
+            status: 'active',
+            effective_at: new Date().toISOString()
+          })
+        }
       } else {
         setCurrentTimer(null)
         setCurrentTask(null)
@@ -59,7 +81,7 @@ export function GlobalTimer() {
           const elapsed = Math.floor((now.getTime() - startTimeRef.current.getTime()) / 1000)
           setElapsedSeconds(elapsed)
         }
-      }, 1000)
+      }, 1000) as unknown as number  // 型アサーションを追加
 
       return () => {
         if (intervalRef.current) {
@@ -98,6 +120,9 @@ export function GlobalTimer() {
   }
 
   const handleStop = async () => {
+    console.log('[GlobalTimer] handleStop called')
+    console.log('[GlobalTimer] onTimerStopped prop:', onTimerStopped)
+    
     Logger.userAction('GlobalTimer', 'timer_stop_initiated', { 
       taskId: currentTimer?.task_id 
     });
@@ -122,7 +147,18 @@ export function GlobalTimer() {
       setIsVisible(false)
       setElapsedSeconds(0)
       startTimeRef.current = null
+      
+      // タイマーストップ後のコールバックを呼び出し
+      console.log('[GlobalTimer] About to call onTimerStopped callback')
+      if (onTimerStopped) {
+        console.log('[GlobalTimer] onTimerStopped is defined, calling it')
+        onTimerStopped()
+        console.log('[GlobalTimer] onTimerStopped callback completed')
+      } else {
+        console.log('[GlobalTimer] onTimerStopped is not defined')
+      }
     } catch (error) {
+      console.error('[GlobalTimer] Error in handleStop:', error)
       Logger.apiError('GlobalTimer', 'POST', 'stop_timer', error, { 
         taskId: currentTimer?.task_id 
       });

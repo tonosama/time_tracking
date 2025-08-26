@@ -16,7 +16,12 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:debug": "playwright test --debug",
-    "test:all": "npm run test:run && npm run test:e2e",
+    "test:e2e:fast": "playwright test --project=chromium",
+    "test:e2e:task-creation": "playwright test tests/e2e/specs/task_creation.spec.ts --project=chromium",
+    "test:e2e:task-creation:headed": "playwright test tests/e2e/specs/task_creation.spec.ts --project=chromium --headed",
+    "test:e2e:task-creation:debug": "playwright test tests/e2e/specs/task_creation.spec.ts --project=chromium --debug",
+    "test:integration": "./scripts/run_integration_tests.sh",
+    "test:all": "npm run test:run && npm run test:integration && npm run test:e2e",
     "tauri:dev": "cd src-tauri && cargo tauri dev",
     "tauri:build": "cd src-tauri && cargo tauri build"
   },
@@ -27,6 +32,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.54.2",
+    "@tailwindcss/postcss": "^4.1.12",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^14.1.2",
     "@testing-library/user-event": "^14.5.1",
@@ -34,7 +40,10 @@
     "@types/react-dom": "^18.2.17",
     "@vitejs/plugin-react": "^4.2.1",
     "@vitest/ui": "^1.0.4",
+    "autoprefixer": "^10.4.21",
     "jsdom": "^23.0.1",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.12",
     "typescript": "^5.2.2",
     "vite": "^5.0.8",
     "vitest": "^1.0.4"

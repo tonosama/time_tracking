@@ -73,6 +73,7 @@ async fn main() {
             get_project_entries,
             get_recent_entries,
             get_time_entries,
+            test_get_time_entries,
             get_global_timer_status,
             get_task_time_summary,
             get_project_time_summary,
@@ -80,6 +81,8 @@ async fn main() {
             is_task_running,
             // ログ出力コマンド
             log_to_file,
+            // デバッグ用コマンド
+            debug_database_state,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

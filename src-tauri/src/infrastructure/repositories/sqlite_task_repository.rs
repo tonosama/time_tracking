@@ -34,21 +34,51 @@ impl TaskRepository for SqliteTaskRepository {
         let db = self.db.lock().await;
         let conn = db.connection();
 
+        eprintln!("[REPO] Saving task: {:?}", task);
+        println!("[REPO] Saving task: {:?}", task);
+
         // タスク識別子を挿入（存在しない場合）
-        conn.execute(
+        eprintln!("[REPO] Inserting task identifier");
+        println!("[REPO] Inserting task identifier");
+        match conn.execute(
             "INSERT OR IGNORE INTO tasks (id) VALUES (?1)",
             params![i64::from(task.id())],
-        )?;
+        ) {
+            Ok(_) => {
+                eprintln!("[REPO] Task identifier inserted/ignored successfully");
+                println!("[REPO] Task identifier inserted/ignored successfully");
+            },
+            Err(e) => {
+                eprintln!("[REPO] Failed to insert task identifier: {}", e);
+                println!("[REPO] Failed to insert task identifier: {}", e);
+                return Err(e.into());
+            }
+        }
 
         // 次のバージョン番号を取得
-        let next_version: i64 = conn.query_row(
+        eprintln!("[REPO] Getting next version number");
+        println!("[REPO] Getting next version number");
+        let next_version: i64 = match conn.query_row(
             "SELECT COALESCE(MAX(version), 0) + 1 FROM task_versions WHERE task_id = ?1",
             params![i64::from(task.id())],
             |row| row.get(0),
-        )?;
+        ) {
+            Ok(version) => {
+                eprintln!("[REPO] Next version number: {}", version);
+                println!("[REPO] Next version number: {}", version);
+                version
+            },
+            Err(e) => {
+                eprintln!("[REPO] Failed to get next version number: {}", e);
+                println!("[REPO] Failed to get next version number: {}", e);
+                return Err(e.into());
+            }
+        };
 
         // タスクバージョンを挿入
-        conn.execute(
+        eprintln!("[REPO] Inserting task version");
+        println!("[REPO] Inserting task version");
+        match conn.execute(
             r#"
             INSERT INTO task_versions (task_id, version, project_id, name, status, effective_at)
             VALUES (?1, ?2, ?3, ?4, ?5, ?6)
@@ -61,9 +91,18 @@ impl TaskRepository for SqliteTaskRepository {
                 task.status().as_str(),
                 Self::format_datetime(task.effective_at()),
             ],
-        )?;
-
-        Ok(())
+        ) {
+            Ok(_) => {
+                eprintln!("[REPO] Task version inserted successfully");
+                println!("[REPO] Task version inserted successfully");
+                Ok(())
+            },
+            Err(e) => {
+                eprintln!("[REPO] Failed to insert task version: {}", e);
+                println!("[REPO] Failed to insert task version: {}", e);
+                Err(e.into())
+            }
+        }
     }
 
     async fn find_by_id(&self, id: TaskId) -> anyhow::Result<Option<Task>> {
@@ -315,13 +354,38 @@ impl TaskRepository for SqliteTaskRepository {
         let db = self.db.lock().await;
         let conn = db.connection();
 
-        let next_id: i64 = conn.query_row(
+        eprintln!("[REPO] Generating next task ID");
+        println!("[REPO] Generating next task ID");
+        
+        let next_id: i64 = match conn.query_row(
             "SELECT COALESCE(MAX(id), 0) + 1 FROM tasks",
             [],
             |row| row.get(0),
-        )?;
+        ) {
+            Ok(id) => {
+                eprintln!("[REPO] Next task ID generated: {}", id);
+                println!("[REPO] Next task ID generated: {}", id);
+                id
+            },
+            Err(e) => {
+                eprintln!("[REPO] Failed to generate next task ID: {}", e);
+                println!("[REPO] Failed to generate next task ID: {}", e);
+                return Err(e.into());
+            }
+        };
 
-        TaskId::new(next_id)
+        match TaskId::new(next_id) {
+            Ok(task_id) => {
+                eprintln!("[REPO] TaskId created successfully: {:?}", task_id);
+                println!("[REPO] TaskId created successfully: {:?}", task_id);
+                Ok(task_id)
+            },
+            Err(e) => {
+                eprintln!("[REPO] Failed to create TaskId: {}", e);
+                println!("[REPO] Failed to create TaskId: {}", e);
+                Err(e)
+            }
+        }
     }
 
     async fn exists(&self, id: TaskId) -> anyhow::Result<bool> {

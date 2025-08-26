@@ -53,7 +53,7 @@ export function CreateTaskModal({ isOpen, onClose, onTaskCreated, projectId }: C
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="新しいタスク">
-      <form onSubmit={handleSubmit} className="create-task-form">
+      <form onSubmit={handleSubmit} className="create-task-form" role="form" data-testid="create-task-modal">
         <Input
           label="タスク名"
           value={name}
@@ -62,6 +62,7 @@ export function CreateTaskModal({ isOpen, onClose, onTaskCreated, projectId }: C
           error={error || undefined}
           required
           autoFocus
+          data-testid="task-name-input"
         />
         
         <div className="modal-actions">
@@ -70,6 +71,7 @@ export function CreateTaskModal({ isOpen, onClose, onTaskCreated, projectId }: C
             variant="secondary"
             onClick={handleClose}
             disabled={loading}
+            data-testid="create-task-cancel"
           >
             キャンセル
           </Button>
@@ -78,6 +80,7 @@ export function CreateTaskModal({ isOpen, onClose, onTaskCreated, projectId }: C
             variant="primary"
             loading={loading}
             disabled={!name.trim() || loading}
+            data-testid="create-task-submit"
           >
             作成
           </Button>

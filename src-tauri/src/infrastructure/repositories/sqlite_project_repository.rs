@@ -100,8 +100,14 @@ impl ProjectRepository for SqliteProjectRepository {
     }
 
     async fn find_all_active(&self) -> anyhow::Result<Vec<Project>> {
+        println!("[REPO] find_all_active called");
+        eprintln!("[REPO] find_all_active called");
+        
         let db = self.db.lock().await;
         let conn = db.connection();
+
+        println!("[REPO] Executing SQL: SELECT project_id, name, status, effective_at FROM project_current_view WHERE status = 'active'");
+        eprintln!("[REPO] Executing SQL: SELECT project_id, name, status, effective_at FROM project_current_view WHERE status = 'active'");
 
         let mut stmt = conn.prepare(
             "SELECT project_id, name, status, effective_at FROM project_current_view WHERE status = 'active'"
@@ -125,6 +131,9 @@ impl ProjectRepository for SqliteProjectRepository {
             projects.push(project);
         }
 
+        println!("[REPO] Found {} active projects", projects.len());
+        eprintln!("[REPO] Found {} active projects", projects.len());
+        
         Ok(projects)
     }
 

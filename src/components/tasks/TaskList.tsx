@@ -1,183 +1,233 @@
-import { useState } from 'react'
-import { invoke } from '@tauri-apps/api/core'
-import type { Task } from '@/types'
+import { useEffect, useState } from 'react'
+import { useTasks } from '@/hooks/useTasks'
+import { TaskCard } from './TaskCard'
 import { Button } from '../common/Button'
-import { EditTaskModal } from './EditTaskModal'
-import { TimerButton, TimeHistoryModal } from '@/components/time_tracking'
+import { Loading } from '../common/Loading'
+import { formatDate } from '@/utils/dateUtils'
+import type { Task, Project } from '@/types'
 
 interface TaskListProps {
-  tasks: Task[]
-  onTaskUpdate?: (task: Task) => void
-  onTaskArchived?: (taskId: number) => void
-  readonly?: boolean
+  selectedProjectId: number | null
+  projects: Project[]
+  showArchived?: boolean
+  onTaskEdit?: (task: Task) => void
+  onTaskArchive?: (task: Task) => void
+  onTaskRestore?: (task: Task) => void
+  onTaskStartTimer?: (task: Task) => void
 }
 
 export function TaskList({ 
-  tasks, 
-  onTaskUpdate, 
-  onTaskArchived,
-  readonly = false 
+  selectedProjectId, 
+  projects, 
+  showArchived = false,
+  onTaskEdit,
+  onTaskArchive,
+  onTaskRestore,
+  onTaskStartTimer
 }: TaskListProps) {
-  const [editingTask, setEditingTask] = useState<Task | null>(null)
-  const [historyTask, setHistoryTask] = useState<Task | null>(null)
+  console.log('[TaskList] Component rendering with props:', { 
+    selectedProjectId, 
+    projectsCount: projects?.length || 0,
+    showArchived 
+  })
+  const { 
+    tasks, 
+    loading, 
+    error, 
+    selectedDate,
+    loadTasks, 
+    goToPreviousDay,
+    goToNextDay,
+    clearError 
+  } = useTasks()
+  const [filteredTasks, setFilteredTasks] = useState<Task[]>([])
 
-  const handleArchiveTask = async (taskId: number) => {
-    try {
-      await invoke('archive_task', {
-        request: { id: taskId }
-      })
-      onTaskArchived?.(taskId)
-    } catch (err) {
-      console.error('タスクアーカイブエラー:', err)
+  // プロジェクトが変更された時にタスクを再読み込み
+  useEffect(() => {
+    console.log('[TaskList] useEffect triggered:', { selectedProjectId, selectedDate })
+    if (selectedProjectId) {
+      console.log('[TaskList] Loading tasks for project:', selectedProjectId)
+      loadTasks(selectedProjectId, selectedDate)
+    } else {
+      console.log('[TaskList] No project selected, clearing tasks')
+      // プロジェクトが選択されていない場合はタスクをクリア
+      setFilteredTasks([])
+    }
+  }, [selectedProjectId, selectedDate, loadTasks])
+
+  // タスクのフィルタリング
+  useEffect(() => {
+    console.log('[TaskList] Tasks filtering effect:', { tasks: tasks?.length, showArchived })
+    if (!tasks) {
+      console.log('[TaskList] No tasks, setting empty filtered tasks')
+      setFilteredTasks([])
+      return
+    }
+
+    const filtered = showArchived 
+      ? tasks // アーカイブ済みも含めてすべて表示
+      : tasks.filter(task => task.status === 'active') // アクティブのみ表示
+
+    console.log('[TaskList] Filtered tasks:', { total: tasks.length, filtered: filtered.length })
+    setFilteredTasks(filtered)
+  }, [tasks, showArchived])
+
+  const handleRetry = () => {
+    clearError()
+    if (selectedProjectId) {
+      loadTasks(selectedProjectId, selectedDate)
     }
   }
 
-  const handleRestoreTask = async (task: Task) => {
-    try {
-      const restoredTask = await invoke<Task>('restore_task', {
-        request: { id: task.id }
-      })
-      onTaskUpdate?.(restoredTask)
-    } catch (err) {
-      console.error('タスク復元エラー:', err)
+  const handlePreviousDay = () => {
+    goToPreviousDay()
+  }
+
+  const handleNextDay = () => {
+    goToNextDay()
+  }
+
+  const isToday = () => {
+    const today = new Date()
+    return selectedDate.toDateString() === today.toDateString()
+  }
+
+  const isFutureDate = () => {
+    const today = new Date()
+    today.setHours(23, 59, 59, 999)
+    return selectedDate > today
+  }
+
+  const handleTaskEdit = (task: Task) => {
+    if (onTaskEdit) {
+      onTaskEdit(task)
     }
   }
 
-  const handleTaskUpdated = (updatedTask: Task) => {
-    setEditingTask(null)
-    onTaskUpdate?.(updatedTask)
+  const handleTaskArchive = (task: Task) => {
+    if (onTaskArchive) {
+      onTaskArchive(task)
+    }
   }
 
-  if (tasks.length === 0) {
+  const handleTaskRestore = (task: Task) => {
+    if (onTaskRestore) {
+      onTaskRestore(task)
+    }
+  }
+
+  const handleTaskStartTimer = (task: Task) => {
+    if (onTaskStartTimer) {
+      onTaskStartTimer(task)
+    }
+  }
+
+  // プロジェクトが選択されていない場合
+  if (!selectedProjectId) {
+    console.log('[TaskList] No project selected, showing empty state')
     return (
-      <div className="empty-state">
-        {readonly ? (
-          <p>タスクがありません</p>
-        ) : (
-          <p>まだタスクがありません。新しいタスクを作成してみましょう。</p>
-        )}
+      <div className="task-list task-list--empty" data-testid="task-list-no-project">
+        <div className="task-list__empty-state">
+          <h3>プロジェクトを選択してください</h3>
+          <p>タスクを表示するには、プロジェクトを選択してください。</p>
+        </div>
       </div>
     )
   }
 
-  return (
-    <div className="task-list">
-      <div className="task-grid">
-        {tasks.map(task => (
-          <TaskItem
-            key={task.id}
-            task={task}
-            onEdit={() => setEditingTask(task)}
-            onArchive={() => handleArchiveTask(task.id)}
-            onRestore={() => handleRestoreTask(task)}
-            onViewHistory={() => setHistoryTask(task)}
-            readonly={readonly}
-          />
-        ))}
+  // ローディング状態
+  if (loading) {
+    console.log('[TaskList] Loading state, showing loading component')
+    return (
+      <div className="task-list" data-testid="task-list-loading">
+        <Loading message="タスクを読み込み中..." />
       </div>
+    )
+  }
 
-      {editingTask && (
-        <EditTaskModal
-          isOpen={true}
-          onClose={() => setEditingTask(null)}
-          onTaskUpdated={handleTaskUpdated}
-          task={editingTask}
-        />
-      )}
+  // エラー状態
+  if (error) {
+    console.log('[TaskList] Error state:', error)
+    return (
+      <div className="task-list task-list--error" data-testid="task-list-error">
+        <div className="task-list__error-state">
+          <h3>エラーが発生しました</h3>
+          <p>{error}</p>
+          <Button onClick={handleRetry} variant="primary">
+            再試行
+          </Button>
+        </div>
+      </div>
+    )
+  }
 
-      {historyTask && (
-        <TimeHistoryModal
-          isOpen={true}
-          onClose={() => setHistoryTask(null)}
-          task={historyTask}
-        />
-      )}
-    </div>
-  )
-}
+  // タスクが存在しない場合
+  if (filteredTasks.length === 0) {
+    console.log('[TaskList] No tasks to display, showing empty state')
+    return (
+      <div className="task-list task-list--empty" data-testid="task-list-empty">
+        <div className="task-list__empty-state">
+          <h3>タスクがありません</h3>
+          <p>新しいタスクを作成してください。</p>
+        </div>
+      </div>
+    )
+  }
 
-interface TaskItemProps {
-  task: Task
-  onEdit: () => void
-  onArchive: () => void
-  onRestore: () => void
-  onViewHistory: () => void
-  readonly: boolean
-}
-
-function TaskItem({ task, onEdit, onArchive, onRestore, onViewHistory, readonly }: TaskItemProps) {
+  // タスク一覧表示
+  console.log('[TaskList] Rendering task list with', filteredTasks.length, 'tasks')
   return (
-    <div className="task-item" data-testid="task-item">
-      <div className="task-header">
-        <h3 className="task-name">{task.name}</h3>
-        <span 
-          className={`task-status ${task.status}`}
-          data-testid="task-status"
-        >
-          {task.status === 'active' ? 'アクティブ' : 'アーカイブ済み'}
+    <div className="task-list" data-testid="task-list" style={{ border: '2px solid red', padding: '20px' }}>
+      <h2>タスク一覧 (デバッグ表示)</h2>
+      <p>selectedProjectId: {selectedProjectId}</p>
+      <p>loading: {loading.toString()}</p>
+      <p>error: {error || 'なし'}</p>
+      <p>tasks count: {tasks?.length || 0}</p>
+      <p>filteredTasks count: {filteredTasks.length}</p>
+      
+      <div className="task-list__header">
+        <div className="task-list__header-left">
+          <h2>タスク一覧</h2>
+          <div className="task-list__date-navigation">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handlePreviousDay}
+              disabled={false}
+              data-testid="previous-day-btn"
+            >
+              &lt;
+            </Button>
+            <span className="task-list__date">
+              {isToday() ? 'Today' : formatDate(selectedDate.toISOString())} - {filteredTasks.length}件のタスク
+            </span>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleNextDay}
+              disabled={isFutureDate()}
+              data-testid="next-day-btn"
+            >
+              &gt;
+            </Button>
+          </div>
+        </div>
+        <span className="task-list__count">
+          {filteredTasks.length}件のタスク
         </span>
       </div>
       
-      <div className="task-meta">
-        <time dateTime={task.effective_at}>
-          更新: {new Date(task.effective_at).toLocaleDateString('ja-JP')}
-        </time>
-      </div>
-
-      {/* タイマーセクション - アクティブなタスクのみ */}
-      {task.status === 'active' && (
-        <div className="task-timer-section">
-          <TimerButton 
+      <div className="task-list__content">
+        {filteredTasks.map(task => (
+          <TaskCard
+            key={task.id}
             task={task}
-            disabled={readonly}
+            onEdit={handleTaskEdit}
+            onArchive={handleTaskArchive}
+            onRestore={handleTaskRestore}
+            onStartTimer={handleTaskStartTimer}
           />
-        </div>
-      )}
-
-      <div className="task-actions">
-        {/* タイム履歴ボタン */}
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={onViewHistory}
-          aria-label={`${task.name}のタイム履歴`}
-        >
-          タイム履歴
-        </Button>
-
-        {!readonly && (
-          <>
-            {task.status === 'active' ? (
-              <>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={onEdit}
-                  aria-label={`${task.name}を編集`}
-                >
-                  編集
-                </Button>
-                <Button
-                  variant="warning"
-                  size="sm"
-                  onClick={onArchive}
-                  aria-label={`${task.name}をアーカイブ`}
-                >
-                  アーカイブ
-                </Button>
-              </>
-            ) : (
-              <Button
-                variant="success"
-                size="sm"
-                onClick={onRestore}
-                aria-label={`${task.name}を復元`}
-              >
-                復元
-              </Button>
-            )}
-          </>
-        )}
+        ))}
       </div>
     </div>
   )

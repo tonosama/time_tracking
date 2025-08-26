@@ -99,9 +99,18 @@ pub async fn get_project(
 pub async fn get_all_active_projects(
     app_service: State<'_, ApplicationService>,
 ) -> Result<Vec<ProjectDto>, String> {
+    println!("[BACKEND] get_all_active_projects called");
+    eprintln!("[BACKEND] get_all_active_projects called");
+    
     match app_service.project_use_cases().get_all_active_projects().await {
-        Ok(projects) => Ok(projects.into_iter().map(ProjectDto::from).collect()),
+        Ok(projects) => {
+            println!("[BACKEND] Found {} active projects", projects.len());
+            eprintln!("[BACKEND] Found {} active projects", projects.len());
+            Ok(projects.into_iter().map(ProjectDto::from).collect())
+        },
         Err(e) => {
+            println!("[BACKEND] Error getting active projects: {}", e);
+            eprintln!("[BACKEND] Error getting active projects: {}", e);
             // データが存在しない場合は空の配列を返す
             if e.to_string().contains("no rows") {
                 Ok(Vec::new())
@@ -117,9 +126,20 @@ pub async fn get_all_active_projects(
 pub async fn get_all_projects(
     app_service: State<'_, ApplicationService>,
 ) -> Result<Vec<ProjectDto>, String> {
+    println!("[BACKEND] get_all_projects called");
+    eprintln!("[BACKEND] get_all_projects called");
+    
     match app_service.project_use_cases().get_all_projects().await {
-        Ok(projects) => Ok(projects.into_iter().map(ProjectDto::from).collect()),
-        Err(e) => Err(e.to_string()),
+        Ok(projects) => {
+            println!("[BACKEND] Found {} projects", projects.len());
+            eprintln!("[BACKEND] Found {} projects", projects.len());
+            Ok(projects.into_iter().map(ProjectDto::from).collect())
+        },
+        Err(e) => {
+            println!("[BACKEND] Error getting projects: {}", e);
+            eprintln!("[BACKEND] Error getting projects: {}", e);
+            Err(e.to_string())
+        }
     }
 }
 

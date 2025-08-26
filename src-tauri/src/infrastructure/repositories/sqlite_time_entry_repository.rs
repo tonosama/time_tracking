@@ -503,14 +503,26 @@ impl TimeEntryRepository for SqliteTimeEntryRepository {
     }
 
     async fn find_recent_entries(&self, limit: usize) -> anyhow::Result<Vec<TimeEntry>> {
+        println!("[REPO] find_recent_entries called with limit: {}", limit);
+        eprintln!("[REPO] find_recent_entries called with limit: {}", limit);
+        
         tracing::info!("SqliteTimeEntryRepository::find_recent_entries: Starting with limit: {}", limit);
         
         let db = self.db.lock().await;
+        println!("[REPO] find_recent_entries: Successfully acquired database lock");
+        eprintln!("[REPO] find_recent_entries: Successfully acquired database lock");
+        
         tracing::debug!("SqliteTimeEntryRepository::find_recent_entries: Successfully acquired database lock");
         
         let conn = db.connection();
+        println!("[REPO] find_recent_entries: Got database connection");
+        eprintln!("[REPO] find_recent_entries: Got database connection");
+        
         tracing::debug!("SqliteTimeEntryRepository::find_recent_entries: Got database connection");
 
+        println!("[REPO] find_recent_entries: Preparing SQL statement");
+        eprintln!("[REPO] find_recent_entries: Preparing SQL statement");
+        
         tracing::debug!("SqliteTimeEntryRepository::find_recent_entries: Preparing SQL statement");
         let mut stmt = match conn.prepare(
             r#"
@@ -521,16 +533,25 @@ impl TimeEntryRepository for SqliteTimeEntryRepository {
             "#,
         ) {
             Ok(stmt) => {
+                println!("[REPO] find_recent_entries: SQL statement prepared successfully");
+                eprintln!("[REPO] find_recent_entries: SQL statement prepared successfully");
+                
                 tracing::debug!("SqliteTimeEntryRepository::find_recent_entries: SQL statement prepared successfully");
                 stmt
             },
             Err(e) => {
+                println!("[REPO] find_recent_entries: Failed to prepare SQL statement: {}", e);
+                eprintln!("[REPO] find_recent_entries: Failed to prepare SQL statement: {}", e);
+                
                 tracing::error!("SqliteTimeEntryRepository::find_recent_entries: Failed to prepare SQL statement: {}", e);
                 tracing::error!("SqliteTimeEntryRepository::find_recent_entries: SQL: SELECT task_id, start_event_id, start_time, end_time, duration_in_seconds FROM time_entries_view ORDER BY start_time DESC LIMIT ?1");
                 return Err(e.into());
             }
         };
 
+        println!("[REPO] find_recent_entries: Executing query with limit: {}", limit);
+        eprintln!("[REPO] find_recent_entries: Executing query with limit: {}", limit);
+        
         tracing::debug!("SqliteTimeEntryRepository::find_recent_entries: Executing query with limit: {}", limit);
         let entry_iter = match stmt.query_map(params![limit], |row| {
             let task_id: i64 = row.get(0)?;
@@ -542,10 +563,16 @@ impl TimeEntryRepository for SqliteTimeEntryRepository {
             Ok((task_id, start_event_id, start_time_str, end_time_str))
         }) {
             Ok(iter) => {
+                println!("[REPO] find_recent_entries: Query executed successfully");
+                eprintln!("[REPO] find_recent_entries: Query executed successfully");
+                
                 tracing::debug!("SqliteTimeEntryRepository::find_recent_entries: Query executed successfully");
                 iter
             },
             Err(e) => {
+                println!("[REPO] find_recent_entries: Failed to execute query: {}", e);
+                eprintln!("[REPO] find_recent_entries: Failed to execute query: {}", e);
+                
                 tracing::error!("SqliteTimeEntryRepository::find_recent_entries: Failed to execute query: {}", e);
                 tracing::error!("SqliteTimeEntryRepository::find_recent_entries: Query parameters: limit={}", limit);
                 return Err(e.into());
@@ -624,6 +651,11 @@ impl TimeEntryRepository for SqliteTimeEntryRepository {
             }
         }
 
+        println!("[REPO] find_recent_entries: Processing completed - rows processed: {}, entries created: {}", 
+            row_count, entries.len());
+        eprintln!("[REPO] find_recent_entries: Processing completed - rows processed: {}, entries created: {}", 
+            row_count, entries.len());
+        
         tracing::info!("SqliteTimeEntryRepository::find_recent_entries: Processing completed - rows processed: {}, entries created: {}", 
             row_count, entries.len());
         tracing::debug!("SqliteTimeEntryRepository::find_recent_entries: Successfully returning {} entries", entries.len());

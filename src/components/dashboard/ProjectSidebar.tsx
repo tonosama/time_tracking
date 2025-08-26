@@ -2,6 +2,7 @@ import { Project, TimeEntry } from '@/types'
 import { formatDuration, Logger } from '@/utils'
 import { invoke } from '@tauri-apps/api/core'
 import { useState } from 'react'
+import { ProjectEditButton } from '../projects/ProjectEditButton'
 
 interface ProjectSidebarProps {
   projects: Project[]
@@ -9,6 +10,7 @@ interface ProjectSidebarProps {
   selectedProject: Project | null
   onProjectSelect: (project: Project) => void
   onRefresh: () => void
+  onProjectEdit?: (project: Project) => void
 }
 
 interface ProjectItemProps {
@@ -17,10 +19,14 @@ interface ProjectItemProps {
   taskCount: number
   isSelected: boolean
   onClick: () => void
+  onEdit?: (project: Project) => void
 }
 
-function ProjectItem({ project, totalTime, taskCount, isSelected, onClick }: ProjectItemProps) {
+function ProjectItem({ project, totalTime, taskCount, isSelected, onClick, onEdit }: ProjectItemProps) {
+  console.log('[ProjectItem] Rendering project:', { id: project.id, name: project.name, isSelected })
+  
   const handleClick = () => {
+    console.log('[ProjectItem] Clicked project:', { id: project.id, name: project.name })
     Logger.userAction('ProjectSidebar', 'project_selected', { 
       projectId: project.id,
       projectName: project.name,
@@ -45,6 +51,17 @@ function ProjectItem({ project, totalTime, taskCount, isSelected, onClick }: Pro
         <span className="project-stats">{taskCount} tasks</span>
       </div>
       <span className="project-time">{formatDuration(totalTime)}</span>
+      {onEdit && (
+        <ProjectEditButton
+          onClick={() => {
+            console.log('ProjectSidebar ProjectEditButton onClick', { project });
+            onEdit(project)
+          }}
+          aria-label={`プロジェクト「${project.name}」を編集`}
+          className="project-item-edit-btn"
+        />
+      )}
+
     </div>
   )
 }
@@ -54,10 +71,12 @@ export function ProjectSidebar({
   timeEntries, 
   selectedProject, 
   onProjectSelect,
-  onRefresh
+  onRefresh,
+  onProjectEdit
 }: ProjectSidebarProps) {
+  console.log('[ProjectSidebar] Component rendering')
   // デバッグ用ログ
-  console.log('ProjectSidebar - Props:', {
+  console.log('[ProjectSidebar] Props:', {
     projectsCount: projects?.length || 0,
     projects: projects,
     timeEntriesCount: timeEntries?.length || 0,
@@ -137,7 +156,7 @@ export function ProjectSidebar({
   }
   
   return (
-    <div className="project-sidebar">
+    <div className="project-sidebar" data-testid="project-sidebar">
       <div className="sidebar-header">
         <h3>Projects</h3>
         <button 
@@ -170,6 +189,7 @@ export function ProjectSidebar({
                 taskCount={taskCount}
                 isSelected={selectedProject?.id === project.id}
                 onClick={() => onProjectSelect(project)}
+                onEdit={onProjectEdit}
               />
             ))
           ) : (

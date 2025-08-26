@@ -20,10 +20,10 @@ sprints:
     goal: "基盤とコア（タスク/タイムトラッキング）実装"
     status: "in_progress"
     progress:
-      completed_stories: 4
-      total_stories: 5
-      completion_percentage: 80
-      notes: "プロジェクト管理機能、テストスイート、UI実装完了。暗号化機能が残存"
+      completed_stories: 5
+      total_stories: 6
+      completion_percentage: 83
+      notes: "プロジェクト管理機能（作成・一覧・編集）、テストスイート、UI実装完了。暗号化機能とプロジェクトアーカイブ・復元が残存"
   - sprint_id: "S2"
     name: "スプリント2"
     start_date: "2025-08-19"
@@ -80,6 +80,26 @@ epics:
           - "✅ プロジェクト作成時のバリデーションが機能する"
           - "✅ プロジェクト作成・一覧取得のAPIが正常に動作する"
           - "✅ 包括的なテストスイート（ユニット・統合・E2E）が実装されている"
+      
+      - story_id: "US-014"
+        title: "プロジェクト編集機能を実装する"
+        description: |
+          ユーザーとして、既存のプロジェクトの名前、色、説明を編集したい。
+          なぜなら、プロジェクトの詳細を後から変更したいから。
+        priority: "high"
+        story_points: 5
+        assignee: "tonosama"
+        status: "done"
+        sprint: "S1"
+        completed_date: "2025-08-16"
+        memo: "ProjectEditModal、ProjectEditButton、バリデーション機能実装完了。TDDアプローチで実装、イベント伝播問題も解決済み"
+        acceptance_criteria:
+          - "✅ プロジェクト編集ボタンがタイマーセクションとプロジェクトサイドバーに表示される"
+          - "✅ プロジェクト編集モーダルで名前、色、説明を編集できる"
+          - "✅ プロジェクト名の重複チェックとバリデーションが機能する"
+          - "✅ プロジェクト更新のAPIが正常に動作する"
+          - "✅ レスポンシブなモーダルレイアウトでボタンが常に見える"
+          - "✅ 包括的なテストスイート（ユニット・統合）が実装されている"
 
   - epic_id: "EP-002"
     title: "時間計測（タイムトラッキング）"

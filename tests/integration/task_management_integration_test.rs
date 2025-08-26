@@ -1,6 +1,3 @@
-use std::sync::Arc;
-use tokio::sync::Mutex;
-use tauri::test;
 use time_tracker_go::infrastructure::database::connection::DatabaseConnection;
 use time_tracker_go::infrastructure::repositories::{
     sqlite_project_repository::SqliteProjectRepository,
@@ -11,7 +8,7 @@ use time_tracker_go::application::use_cases::{
     CreateTaskCommand, UpdateTaskCommand, ArchiveTaskCommand, RestoreTaskCommand,
     CreateProjectCommand,
 };
-use time_tracker_go::domain::value_objects::{ProjectId, TaskId, Status};
+use time_tracker_go::domain::value_objects::{ProjectId, TaskId};
 use time_tracker_go::domain::entities::{Project, Task};
 
 struct TestContext {
@@ -29,14 +26,13 @@ impl TestContext {
         let db_connection = DatabaseConnection::new_in_memory().await.unwrap();
         
         // マイグレーションを実行
-        db_connection.run_migrations().await.unwrap();
+        db_connection.run_migrations().unwrap();
         
-        let project_repository = SqliteProjectRepository::new(db_connection.clone());
-        let task_repository = SqliteTaskRepository::new(db_connection.clone());
-        let app_service = ApplicationService::new(
-            Arc::new(project_repository.clone()),
-            Arc::new(task_repository.clone()),
-            Arc::new(Mutex::new(())),
+        let project_repository = SqliteProjectRepository::new(db_connection);
+        let task_repository = SqliteTaskRepository::new(db_connection);
+        let app_service = ApplicationService::new_for_test(
+            project_repository.clone(),
+            task_repository.clone(),
         );
 
         Self {
@@ -53,7 +49,7 @@ impl TestContext {
         let project_id = self.project_repository.next_id().await.unwrap();
         let project = Project::new(project_id, name.to_string()).unwrap();
         self.project_repository.save(&project).await.unwrap();
-        self.created_project_ids.push(project_id.value());
+        self.created_project_ids.push(project_id.value().try_into().unwrap());
         project
     }
 
@@ -61,7 +57,7 @@ impl TestContext {
         let task_id = self.task_repository.next_id().await.unwrap();
         let task = Task::new(task_id, project_id, name.to_string()).unwrap();
         self.task_repository.save(&task).await.unwrap();
-        self.created_task_ids.push(task_id.value());
+        self.created_task_ids.push(task_id.value().try_into().unwrap());
         task
     }
 
@@ -302,8 +298,8 @@ async fn test_archived_project_task_restrictions_with_database() {
         id: project.id(),
     };
     
-    let result = ctx.app_service.project_use_cases().archive_project(archive_command).await;
-    assert!(result.is_ok(), "プロジェクトアーカイブに失敗: {:?}", result.err());
+    let archive_result = ctx.app_service.project_use_cases().archive_project(archive_command).await;
+    assert!(archive_result.is_ok(), "プロジェクトアーカイブに失敗: {:?}", archive_result.err());
     
     // アーカイブ済みプロジェクトでタスク作成を試行
     let command = CreateTaskCommand {

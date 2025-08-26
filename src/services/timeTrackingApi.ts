@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core'
-import type { TimeEntry, TimerStatus, CurrentTimer, TaskTimeSummary } from '@/types'
+import type { TimeEntry, TimerStatus, CurrentTimer, TaskTimeSummary, Task } from '@/types'
 
 export interface StartTimerRequest {
   task_id: number
@@ -57,6 +57,13 @@ export class TimeTrackingApi {
    */
   static async getTimerStatus(taskId: number): Promise<TimerStatus> {
     return await invoke('get_timer_status', { taskId })
+  }
+
+  /**
+   * 指定タスクを取得する
+   */
+  static async getTask(taskId: number): Promise<Task | null> {
+    return await invoke('get_task', { id: taskId })
   }
 
   /**
